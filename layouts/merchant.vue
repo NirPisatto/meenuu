@@ -3,11 +3,11 @@
 </script>
 
 <template>
-  <div>
+  <v-app>
     <v-container max-width="1200px">
       <slot />
     </v-container>
-  </div>
+  </v-app>
 </template>
 
 <style scoped>
