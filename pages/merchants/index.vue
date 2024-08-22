@@ -102,18 +102,6 @@ export default defineComponent({
 
 
     <v-col col="12" class="overflow-x-auto py-6">
-      <!--      <div class="d-flex align-center flex-column pa-6">-->
-      <!--        -->
-      <!--            v-model="toggle"-->
-      <!--            variant="outlined"-->
-      <!--            divided-->
-      <!--        >-->
-      <!--          <v-btn icon="mdi-format-align-left"></v-btn>-->
-      <!--          <v-btn icon="mdi-format-align-center"></v-btn>-->
-      <!--          <v-btn icon="mdi-format-align-right"></v-btn>-->
-      <!--          <v-btn icon="mdi-format-align-justify"></v-btn>-->
-      <!--        </v-btn-toggle>-->
-      <!--      </div>-->
       <v-item-group selected-class="bg-primary" v-model="selectedCategory">
         <v-row class="d-flex flex-row flex-nowrap">
           <div
@@ -134,21 +122,38 @@ export default defineComponent({
           </div>
         </v-row>
       </v-item-group>
-
-
-<!--      <v-row class="d-flex flex-row flex-nowrap">-->
-<!--        <v-btn-toggle divided>-->
-<!--          <v-btn v-for="(item, index) in categories" key="index"-->
-<!--                 :prepend-icon="item.icon"-->
-<!--                 size="large"-->
-<!--                 color="primary"-->
-<!--                 variant="outlined"-->
-<!--                 class="mr-3 rounded-lg">-->
-<!--            {{ item.label_en }}-->
-<!--          </v-btn>-->
-<!--        </v-btn-toggle>-->
-<!--      </v-row>-->
     </v-col>
+
+    <v-row>
+      <v-col cols="6" md="6" lg="4" class="mb-4">
+        <v-card class="rounded-lg py-2 px-2">
+          <v-img
+              src="/images/demo_banner_img.jpeg"
+              height="160px"
+              cover
+              class="rounded-lg"
+          ></v-img>
+          <v-card-title class="text-h6 px-0">
+            Merchant Name
+          </v-card-title>
+          <v-card-subtitle class="text-caption px-0">
+            Category
+          </v-card-subtitle>
+          <v-card-text class="px-3">
+            <v-row>
+              <v-chip class="rounded-lg" color="primary" text-color="white">
+                <v-icon left>mdi-star</v-icon>
+                4.5
+              </v-chip>
+              <v-chip class="rounded-lg" color="primary" text-color="white">
+                <v-icon left>mdi-clock-time-four-outline</v-icon>
+                30-45 mins
+              </v-chip>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
