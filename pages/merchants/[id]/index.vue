@@ -2,6 +2,7 @@
 import { defineComponent } from "vue";
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 import SearchCard from "~/components/merchant/search-card.vue";
+import BannerWindow from "~/components/merchant/banner-window.vue";
 
 definePageMeta({
   layout: "merchant",
@@ -9,7 +10,7 @@ definePageMeta({
 
 export default defineComponent({
   name: "merchantDetailPage",
-  components: { SearchCard, BannerCarousel },
+  components: { SearchCard, BannerCarousel, BannerWindow },
   data() {
     return {
       selectedCategory: 0,
@@ -59,7 +60,6 @@ export default defineComponent({
           slug: "other",
         },
       ],
-
       menues: [
         {
           id: "0001",
@@ -73,42 +73,42 @@ export default defineComponent({
           name: "Menu 2",
           price_en: 20,
           price_km: 20 * 4001,
-          image: "/images/demo_banner_img.jpeg",
+          image: "/images/02.jpeg",
         },
         {
           id: "0003",
           name: "Menu 3",
           price_en: 30,
           price_km: 30 * 4001,
-          image: "/images/demo_banner_img.jpeg",
+          image: "/images/03.jpeg",
         },
         {
           id: "0004",
           name: "Menu 4",
           price_en: 40,
           price_km: 40 * 4001,
-          image: "/images/demo_banner_img.jpeg",
+          image: "/images/04.jpeg",
         },
         {
           id: "0005",
           name: "Menu 5",
           price_en: 50,
           price_km: 50 * 4001,
-          image: "/images/demo_banner_img.jpeg",
+          image: "/images/03.jpeg",
         },
         {
           id: "0006",
           name: "Menu 6",
           price_en: 60,
           price_km: 60 * 4001,
-          image: "/images/demo_banner_img.jpeg",
+          image: "/images/02.jpeg",
         },
         {
           id: "0007",
           name: "Menu 7",
           price_en: 70,
           price_km: 70 * 4001,
-          image: "/images/demo_banner_img.jpeg",
+          image: "/images/01.jpeg",
         },
         {
           id: "0008",
@@ -155,7 +155,7 @@ export default defineComponent({
 
     <v-spacer class="my-4 py-3"></v-spacer>
 
-    <banner-carousel :banners="banners"></banner-carousel>
+    <BannerWindow :banners="banners"></BannerWindow>
 
     <search-card class="mt-6">
       <v-text-field
@@ -193,7 +193,7 @@ export default defineComponent({
       </v-item-group>
     </v-col>
 
-    <v-row class="px-1">
+    <v-row class="px-1 mt-0">
       <v-col
         cols="6"
         sm="4"
@@ -210,7 +210,7 @@ export default defineComponent({
           color="primary"
         >
           <v-img
-            src="/images/demo_banner_img.jpeg"
+            :src="item.image"
             height="160px"
             cover
             class="rounded-lg"

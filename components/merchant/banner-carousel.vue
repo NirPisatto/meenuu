@@ -16,6 +16,14 @@ export default defineComponent({
       type: String,
       default: "130px",
     },
+    showArrows: {
+      type: Boolean,
+      default: false,
+    },
+    hideDelimiters: {
+      type: Boolean,
+      default: false,
+    }
   },
 });
 </script>
@@ -24,8 +32,9 @@ export default defineComponent({
   <v-carousel
     :height="height"
     class="rounded-lg"
-    :show-arrows="false"
-    hide-delimiters
+    :show-arrows="showArrows"
+    :hide-delimiters="hideDelimiters"
+    hide-delimiter-background
   >
     <v-carousel-item
       v-for="(item, i) in banners"
