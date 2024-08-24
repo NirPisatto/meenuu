@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SpeedInsights } from "@vercel/speed-insights/nuxt"
 
 </script>
 
@@ -12,6 +13,7 @@
         {{ new Date().getFullYear() }} — <strong>meenuu</strong>
       </div>
     </v-footer>
+    <SpeedInsights />
   </div>
 
 </template>
