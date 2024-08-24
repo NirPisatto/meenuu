@@ -1,9 +1,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
+definePageMeta({
+  layout: "default",
+});
+
 
 export default defineComponent({
   name: "homaPage",
-  layout: "default",
 });
 </script>
 
