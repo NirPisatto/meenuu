@@ -152,7 +152,7 @@ export default defineComponent({
   },
   methods: {
     go(id: string, index: number) {
-      this.goTo(`#category_${id}`, {offset: -136})
+      this.goTo(`#category_${id}`, {offset: -136, duration: 500, easing: 'easeInOutCubic'})
       this.selectedCategory = index
     }
   },
@@ -242,7 +242,7 @@ export default defineComponent({
                 data-aos="fade-up"
                 data-aos-offset="0"
                 :data-aos-delay="20*index"
-                data-aos-duration="300"
+                data-aos-duration="400"
                 data-aos-easing="ease-in-out"
                 data-aos-once="true"
                 data-aos-mirror="false"
