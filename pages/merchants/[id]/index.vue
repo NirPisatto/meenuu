@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from "vue";
+import {defineComponent} from "vue";
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 import SearchCard from "~/components/merchant/search-card.vue";
 import BannerWindow from "~/components/merchant/banner-window.vue";
@@ -10,17 +10,18 @@ definePageMeta({
 
 export default defineComponent({
   name: "merchantDetailPage",
-  components: { SearchCard, BannerCarousel, BannerWindow },
+  components: {SearchCard, BannerCarousel, BannerWindow},
   data() {
     return {
+      isOldLayout: false,
       selectedCategory: 0,
       merchant: {
         name: "MeeNuu Demo Merchant",
       },
       banners: [
-        { src: "/images/demo_banner_img.jpeg" },
-        { src: "/images/demo_banner_img.jpeg" },
-        { src: "/images/demo_banner_img.jpeg" },
+        {src: "/images/demo_banner_img.jpeg"},
+        {src: "/images/demo_banner_img.jpeg"},
+        {src: "/images/demo_banner_img.jpeg"},
       ],
       categories: [
         {
@@ -70,7 +71,7 @@ export default defineComponent({
         },
         {
           id: "0002",
-          name: "Menu 2",
+          name: "Menu Name Long Long",
           price_en: 20,
           price_km: 20 * 4001,
           image: "/images/02.jpeg",
@@ -134,56 +135,65 @@ export default defineComponent({
       ],
     };
   },
+  created() {
+  },
+  mounted() {
+    setTimeout(() => {
+      this.selectedCategory = 0
+    }, 2000);
+  },
 });
 </script>
 
 <template>
   <div>
-    <v-app-bar :elevation="0" class="px-3">
-      <template v-slot:prepend>
-        <v-avatar border="0">
-          <v-img alt="merchantnpm  logo" src="/images/logo.jpeg"></v-img>
-        </v-avatar>
-      </template>
-      <v-app-bar-title class="text-primary">
-        {{ merchant.name }} - {{ $route.params.id }}
-      </v-app-bar-title>
-      <template v-slot:append>
-        <v-btn color="primary" icon="mdi-cart-outline"></v-btn>
-      </template>
-    </v-app-bar>
+    <v-container>
+      <v-app-bar :elevation="0" class="px-3" style="background-color: #FAFAFA">
+        <template v-slot:prepend>
+          <v-avatar border="0">
+            <v-img alt="merchantnpm  logo" src="/images/logo.jpeg"></v-img>
+          </v-avatar>
+        </template>
+        <v-app-bar-title class="text-primary">
+          {{ merchant.name }} - {{ $route.params.id }}
+        </v-app-bar-title>
+        <template v-slot:append>
+          <v-btn color="primary" icon="mdi-cart-outline"></v-btn>
+        </template>
+      </v-app-bar>
 
-    <v-spacer class="my-4 py-3"></v-spacer>
+      <v-spacer class="my-4 py-3"></v-spacer>
 
-    <BannerWindow :banners="banners"></BannerWindow>
+      <BannerWindow :banners="banners" height="120px"></BannerWindow>
 
-    <search-card class="mt-6">
-      <v-text-field
-        placeholder="Search"
-        color="primary"
-        variant="outlined"
-        clearable
-        hide-details
-        bg-color="white"
-        prepend-inner-icon="mdi-magnify"
-        density="compact"
-        class="mb-2 rounded text-title-case"
-      >
-      </v-text-field>
-    </search-card>
+      <search-card class="mt-3">
+        <v-text-field
+            placeholder="Search"
+            color="primary"
+            variant="outlined"
+            clearable
+            hide-details
+            bg-color="white"
+            prepend-inner-icon="mdi-magnify"
+            density="compact"
+            class="mb-2 rounded text-title-case"
+        >
+        </v-text-field>
+      </search-card>
+    </v-container>
 
-    <v-col col="12" class="overflow-x-auto py-6">
-      <v-item-group selected-class="bg-primary" v-model="selectedCategory">
+    <v-col col="12" class="overflow-x-auto py-6 position-sticky cus-bg Flipped">
+      <v-item-group selected-class="bg-primary" v-model="selectedCategory" class="px-3 Content">
         <v-row class="d-flex flex-row flex-nowrap">
           <div v-for="item in categories" :key="item.slug">
             <v-item v-slot="{ isSelected, selectedClass, toggle }">
               <v-btn
-                :prepend-icon="item.icon"
-                size="large"
-                :color="isSelected ? 'primary' : 'grey'"
-                variant="outlined"
-                @click="toggle"
-                class="mr-3 rounded-lg"
+                  :prepend-icon="item.icon"
+                  size="large"
+                  :color="isSelected ? 'primary' : 'grey'"
+                  variant="outlined"
+                  @click="toggle"
+                  class="mr-3 rounded-lg"
               >
                 {{ item.label_en }}
               </v-btn>
@@ -193,65 +203,200 @@ export default defineComponent({
       </v-item-group>
     </v-col>
 
-    <v-row class="px-1 mt-0">
-      <v-col
-        cols="6"
-        sm="4"
-        md="4"
-        lg="3"
-        class="mb-0 px-2"
-        v-for="item in menues"
-        :key="item.id"
-      >
-        <v-card
-          :to="`/merchants/${$route.params.id}/${item.id}`"
-          class="rounded-lg py-2 px-2"
-          variant="outlined"
-          color="primary"
-        >
-          <v-img
-            :src="item.image"
-            height="160px"
-            cover
-            class="rounded-lg"
-          ></v-img>
+    <v-container v-if="!isOldLayout" class="py-0">
+      <v-row class="px-1 mt-0">
+        <v-col class="col-6 px-0">
+          <v-col
+              cols="12"
+              class="mb-0 px-2"
+              v-for="item in menues.filter((item, index) => index % 2 === 0)"
+              :key="item.id"
+          >
+            <v-card
+                :to="`/merchants/${$route.params.id}/${item.id}`"
+                class="rounded-lg py-2 px-2"
+                variant="outlined"
+                color="primary"
+            >
+              <v-img
+                  :src="item.image"
+                  cover
+                  class="rounded-lg"
+              ></v-img>
 
-          <v-card-subtitle class="text-caption px-0 mt-2 text-primary">
-            ID : {{ item.id }}
-          </v-card-subtitle>
-          <v-card-title class="text-h6 px-0 font-weight-regular text-black">
-            {{ item.name }}
-          </v-card-title>
+              <v-card-subtitle class="text-caption px-0 mt-2 text-primary">
+                ID : {{ item.id }}
+              </v-card-subtitle>
+              <v-card-title class="text-h6 px-0 font-weight-regular text-black text-wrap">
+                {{ item.name }}
+              </v-card-title>
 
-          <v-card-text class="px-3 mt-3">
-            <v-row>
+              <v-card-text class="px-3 mt-3">
+                <v-row>
               <span class="text-subtitle-1 font-weight-regular">
                 $ {{ item.price_en }} | R {{ item.price_km }}
               </span>
-              <!-- <div>
-                  <v-chip
-                    class="rounded-lg mr-2"
-                    color="primary"
-                    text-color="white"
-                  >
-                    <v-icon left>mdi-star</v-icon>
-                    4.5
-                  </v-chip>
-                  <v-chip
-                    class="rounded-lg mr-2"
-                    color="primary"
-                    text-color="white"
-                  >
-                    <v-icon left>mdi-clock-time-four-outline</v-icon>
-                    30-45 mins
-                  </v-chip>
-                </div> -->
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+                  <!-- <div>
+                      <v-chip
+                        class="rounded-lg mr-2"
+                        color="primary"
+                        text-color="white"
+                      >
+                        <v-icon left>mdi-star</v-icon>
+                        4.5
+                      </v-chip>
+                      <v-chip
+                        class="rounded-lg mr-2"
+                        color="primary"
+                        text-color="white"
+                      >
+                        <v-icon left>mdi-clock-time-four-outline</v-icon>
+                        30-45 mins
+                      </v-chip>
+                    </div> -->
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-col>
+        <v-col class="col-6 px-0">
+          <v-col
+              cols="12"
+              class="mb-0 px-2"
+              v-for="item in menues.filter((item, index) => index % 2 === 1)"
+              :key="item.id"
+          >
+            <v-card
+                :to="`/merchants/${$route.params.id}/${item.id}`"
+                class="rounded-lg py-2 px-2"
+                variant="outlined"
+                color="primary"
+            >
+              <v-img
+                  :src="item.image"
+                  cover
+                  class="rounded-lg"
+              ></v-img>
+
+              <v-card-subtitle class="text-caption px-0 mt-2 text-primary">
+                ID : {{ item.id }}
+              </v-card-subtitle>
+              <v-card-title class="text-h6 px-0 font-weight-regular text-black text-wrap">
+                {{ item.name }}
+              </v-card-title>
+
+              <v-card-text class="px-3 mt-3">
+                <v-row>
+              <span class="text-subtitle-1 font-weight-regular">
+                $ {{ item.price_en }} | R {{ item.price_km }}
+              </span>
+                  <!-- <div>
+                      <v-chip
+                        class="rounded-lg mr-2"
+                        color="primary"
+                        text-color="white"
+                      >
+                        <v-icon left>mdi-star</v-icon>
+                        4.5
+                      </v-chip>
+                      <v-chip
+                        class="rounded-lg mr-2"
+                        color="primary"
+                        text-color="white"
+                      >
+                        <v-icon left>mdi-clock-time-four-outline</v-icon>
+                        30-45 mins
+                      </v-chip>
+                    </div> -->
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-col>
+      </v-row>
+    </v-container>
+    <v-container v-else>
+      <v-row class="px-1 mt-0">
+        <v-col
+            cols="6"
+            sm="4"
+            md="4"
+            lg="3"
+            class="mb-0 px-2"
+            v-for="item in menues"
+            :key="item.id"
+        >
+          <v-card
+              :to="`/merchants/${$route.params.id}/${item.id}`"
+              class="rounded-lg py-2 px-2"
+              variant="outlined"
+              color="primary"
+          >
+            <v-img
+                :src="item.image"
+                height="160px"
+                cover
+                class="rounded-lg"
+            ></v-img>
+
+            <v-card-subtitle class="text-caption px-0 mt-2 text-primary">
+              ID : {{ item.id }}
+            </v-card-subtitle>
+            <v-card-title class="text-h6 px-0 font-weight-regular text-black">
+              {{ item.name }}
+            </v-card-title>
+
+            <v-card-text class="px-3 mt-3">
+              <v-row>
+              <span class="text-subtitle-1 font-weight-regular">
+                $ {{ item.price_en }} | R {{ item.price_km }}
+              </span>
+                <!-- <div>
+                    <v-chip
+                      class="rounded-lg mr-2"
+                      color="primary"
+                      text-color="white"
+                    >
+                      <v-icon left>mdi-star</v-icon>
+                      4.5
+                    </v-chip>
+                    <v-chip
+                      class="rounded-lg mr-2"
+                      color="primary"
+                      text-color="white"
+                    >
+                      <v-icon left>mdi-clock-time-four-outline</v-icon>
+                      30-45 mins
+                    </v-chip>
+                  </div> -->
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <div class="position-fixed px-3" style="bottom: 0; left: 0">
+      <v-switch v-model="isOldLayout" variant="outlined" color="primary">Toggle Layout</v-switch>
+    </div>
   </div>
 </template>
 
-<style></style>
+<style>
+.cus-bg {
+  background: rgb(255, 255, 255);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5130427170868348) 0%, rgba(250, 250, 250, 1) 16%);
+  top: 64px;
+  left: 0px;
+  right: 0px;
+  z-index: 20001;
+}
+
+.Flipped, .Flipped .Content
+{
+  transform:rotateX(180deg);
+  -ms-transform:rotateX(180deg); /* IE 9 */
+  -webkit-transform:rotateX(180deg); /* Safari and Chrome */
+}
+
+</style>

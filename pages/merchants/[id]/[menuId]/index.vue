@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from "vue";
+import {defineComponent} from "vue";
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 import SearchCard from "~/components/merchant/search-card.vue";
 
@@ -9,8 +9,8 @@ definePageMeta({
 
 export default defineComponent({
   name: "merchantDetailPage",
-  components: { SearchCard, BannerCarousel },
-  head () {
+  components: {SearchCard, BannerCarousel},
+  head() {
     return {
       title: `Menu Detail - ` + this.$route.params.menuId,
       meta: [{
@@ -23,13 +23,14 @@ export default defineComponent({
   },
   data() {
     return {
+      onClickAnimation: false,
       selectedCategory: 0,
       merchant: {
         name: "MeeNuu Demo Merchant",
       },
       banners: [
-        { src: "/images/01.jpeg" },
-        { src: "/images/02.jpeg" },
+        {src: "/images/01.jpeg"},
+        {src: "/images/02.jpeg"},
       ],
       categories: [
         {
@@ -143,54 +144,79 @@ export default defineComponent({
       ],
     };
   },
+  methods: {
+    copyUrl() {
+      if (process.client) {
+
+        const currentUrl = window.location.href;
+        navigator.clipboard.writeText(currentUrl).then(() => {
+          this.onClickAnimation = true
+          setTimeout(() => {
+            this.onClickAnimation = false;
+          }, 1000);
+        }).catch(err => {
+          console.error('Failed to copy URL:', err);
+        });
+      }
+    }
+  },
 });
 </script>
 
 <template>
   <div>
-    <v-app-bar :elevation="0" class="px-3">
-      <template v-slot:prepend>
-        <v-btn
-          color="primary"
-          icon="mdi-arrow-left"
-          :to="`/merchants/${$route.params.id}`"
-        ></v-btn>
-      </template>
-      <v-app-bar-title class="text-primary">
-        Menu Detail - {{ $route.params.menuId }}
-      </v-app-bar-title>
+    <v-container>
 
-      <template v-slot:append>
-        <v-btn color="primary" icon="mdi-cart-outline"></v-btn>
-      </template>
-    </v-app-bar>
+      <v-app-bar :elevation="0" class="px-3">
+        <template v-slot:prepend>
+          <v-btn
+              color="primary"
+              icon="mdi-arrow-left"
+              :to="`/merchants/${$route.params.id}`"
+          ></v-btn>
+        </template>
+        <v-app-bar-title class="text-primary">
+          Menu Detail - {{ $route.params.menuId }}
+        </v-app-bar-title>
 
-    <v-spacer class="my-4 py-3"></v-spacer>
+        <template v-slot:append>
+          <v-btn color="primary" icon="mdi-cart-outline"></v-btn>
+        </template>
+      </v-app-bar>
 
-    <banner-carousel :banners="banners" height="300px"> </banner-carousel>
+      <v-spacer class="my-4 py-3"></v-spacer>
 
-    <div class="py-3">
+      <banner-carousel :banners="banners" height="300px"></banner-carousel>
+
+      <div class="py-3">
       <span class="text-h5 text-primary">
         {{ $route.params.menuId }}
       </span>
-    </div>
+      </div>
 
-    <v-card elevation="0" class="px-6 py-6" color="#5581B04D">
-      <v-row class="d-flex justify-between">
-        <p>Grilled Chicken with Apple</p>
-        <v-spacer></v-spacer>
-        <v-btn variant="tonal" rounded icon="mdi-link-variant" density="compact" class="px-3" color="primary"></v-btn>
-      </v-row>
+      <v-card elevation="0" class="px-6 py-6" color="#5581B04D">
+        <v-row class="d-flex justify-between">
+          <p>Grilled Chicken with Apple</p>
+          <v-spacer></v-spacer>
+          <v-btn variant="tonal" rounded :icon="onClickAnimation ? 'mdi-check' : 'mdi-link-variant'" density="compact"
+                 class="px-3"
+                 :color="onClickAnimation ? 'green green-accent-3':'primary'"
+                 @click="copyUrl">
 
-      <v-row class="mt-9">
+          </v-btn>
+        </v-row>
+
+        <v-row class="mt-9">
           <span class="text-subtitle-1 font-weight-regular">
             13 $
           </span>
-      </v-row>
-    </v-card>
+        </v-row>
+      </v-card>
 
-    <h4 class="mt-3">Description</h4>
-    <p>Cras pellentesque fermentum magna, a gravida arcu enam aliquet sit amet. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+      <h4 class="mt-3">Description</h4>
+      <p>Cras pellentesque fermentum magna, a gravida arcu enam aliquet sit amet. Orci varius natoque penatibus et
+        magnis dis parturient montes, nascetur ridiculus mus.</p>
+    </v-container>
   </div>
 </template>
 

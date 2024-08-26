@@ -38,7 +38,7 @@ export default defineComponent({
       class="rounded-lg"
   >
     <v-window-item>
-      <v-img src="/images/demo_banner_img.jpeg" height="200px" cover>
+      <v-img src="/images/demo_banner_img.jpeg" :height="height" cover>
       </v-img>
     </v-window-item>
     <v-window-item>
