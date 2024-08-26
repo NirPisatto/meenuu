@@ -230,7 +230,7 @@ export default defineComponent({
               md="4"
               lg="3"
               class="mb-0 px-2"
-              v-for="item in menues"
+              v-for="(item,index) in menues"
               :key="item.id"
           >
             <v-card
@@ -239,6 +239,11 @@ export default defineComponent({
                 style="height: 100%"
                 variant="outlined"
                 color="primary"
+                data-aos="fade-up"
+                data-aos-offset="0"
+                :data-aos-delay="50*index"
+                data-aos-easing="ease-in-out"
+                data-aos-once="true"
             >
               <div>
                 <v-img

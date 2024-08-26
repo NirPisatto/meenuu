@@ -28,7 +28,7 @@ export default defineNuxtConfig({
       Roboto: true,
       Lato: true,
     }
-  }]],
+  }], 'nuxt-aos'],
   vuetify: {
     moduleOptions: {
     },
