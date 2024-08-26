@@ -241,7 +241,8 @@ export default defineComponent({
                 color="primary"
                 data-aos="fade-up"
                 data-aos-offset="0"
-                :data-aos-delay="50*index"
+                :data-aos-delay="20*index"
+                data-aos-duration="300"
                 data-aos-easing="ease-in-out"
                 data-aos-once="true"
             >
