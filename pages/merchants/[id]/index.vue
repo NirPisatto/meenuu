@@ -245,6 +245,7 @@ export default defineComponent({
                 data-aos-duration="300"
                 data-aos-easing="ease-in-out"
                 data-aos-once="true"
+                data-aos-mirror="false"
             >
               <div>
                 <v-img
