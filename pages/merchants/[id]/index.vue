@@ -17,6 +17,7 @@ export default defineComponent({
   },
   data() {
     return {
+      scrollTop: 0,
       selectedCategory: 0,
       merchant: {
         name: "MeeNuu Demo Merchant",
@@ -32,36 +33,42 @@ export default defineComponent({
           label_km: "ទាំងអស់",
           icon: "mdi-food",
           slug: "all",
+          top: 0
         },
         {
           label_en: "Food",
           label_km: "អាហារ",
           icon: "mdi-food",
           slug: "food",
+          top: 0
         },
         {
           label_en: "Drink",
           label_km: "ភេសជ្ជៈ",
           icon: "mdi-glass-cocktail",
           slug: "drink",
+          top: 0
         },
         {
           label_en: "Bakery",
           label_km: "ប៊ីគោរ",
           icon: "mdi-bread-slice",
           slug: "grocery",
+          top: 0
         },
         {
           label_en: "Lunch",
           label_km: "អាហារពេលព្រឹក",
           icon: "mdi-food",
           slug: "pharmacy",
+          top: 0
         },
         {
           label_en: "Other",
           label_km: "ផ្សេងៗ",
           icon: "mdi-dots-horizontal",
           slug: "other",
+          top: 0
         },
       ],
       menues: [
@@ -140,20 +147,53 @@ export default defineComponent({
         duration: 300,
         easing: 'easeInOutCubic',
         offset: 0,
-      }
+      },
     };
   },
   created() {
+
   },
   mounted() {
     setTimeout(() => {
       this.selectedCategory = 0
     }, 2000);
+
+    window.addEventListener('scroll', this.handleScroll);
+
+    this.categories.forEach((item)=>{
+      const position = this.getOffsetById(`category_${item.slug}`)
+      item.top = <number> position?.top + 136
+    })
+  },
+  unmounted() {
+    // Remove scroll event listener when the component is destroyed
+    window.removeEventListener('scroll', this.handleScroll);
   },
   methods: {
+    findIndex(arr: number[], current : number) {
+      for (let i = 0; i < arr.length; i++) {
+        if (current >= arr[i] && current < arr[i + 1]) {
+          return i;
+        }
+      }
+      return 0;
+    },
+    handleScroll() {
+      this.scrollTop = document.documentElement.scrollTop;
+      this.selectedCategory = this.findIndex(this.categories.map((item) => item.top), this.scrollTop)
+    },
     go(id: string, index: number) {
       this.goTo(`#category_${id}`, {offset: -136, duration: 600, easing: 'easeInOutCubic'})
       this.selectedCategory = index
+    },
+    getOffsetById(id: string) {
+      const item = document.getElementById(id)
+      if (!item) return
+      const rect = item.getBoundingClientRect();
+      return {
+        left: rect.left + window.scrollX,
+        top: rect.top + window.scrollY
+      };
     }
   },
 });
