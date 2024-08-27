@@ -18,6 +18,7 @@ export default defineComponent({
   data() {
     return {
       scrollTop: 0,
+      scrollBlocker: false,
       selectedCategory: 0,
       merchant: {
         name: "MeeNuu Demo Merchant",
@@ -33,42 +34,54 @@ export default defineComponent({
           label_km: "ទាំងអស់",
           icon: "mdi-food",
           slug: "all",
-          top: 0
+          top: 0,
+          right: 0,
+          left: 0,
         },
         {
           label_en: "Food",
           label_km: "អាហារ",
           icon: "mdi-food",
           slug: "food",
-          top: 0
+          top: 0,
+          right: 0,
+          left: 0,
         },
         {
           label_en: "Drink",
           label_km: "ភេសជ្ជៈ",
           icon: "mdi-glass-cocktail",
           slug: "drink",
-          top: 0
+          top: 0,
+          right: 0,
+          left: 0,
         },
         {
           label_en: "Bakery",
           label_km: "ប៊ីគោរ",
           icon: "mdi-bread-slice",
           slug: "grocery",
-          top: 0
+          top: 0,
+          right: 0,
+          left: 0,
         },
         {
           label_en: "Lunch",
           label_km: "អាហារពេលព្រឹក",
           icon: "mdi-food",
           slug: "pharmacy",
-          top: 0
+          top: 0,
+          right: 0,
+          left: 0,
         },
         {
           label_en: "Other",
           label_km: "ផ្សេងៗ",
           icon: "mdi-dots-horizontal",
           slug: "other",
-          top: 0
+          top: 0,
+          right: 0,
+          left: 0,
         },
       ],
       menues: [
@@ -156,13 +169,22 @@ export default defineComponent({
   mounted() {
     setTimeout(() => {
       this.selectedCategory = 0
+
+      // const container = document.getElementById('category-btn-container')
+
+      // container?.scrollTo({
+      //   left: 100, // Use scrollLeft if scrolling horizontally
+      //   behavior: 'smooth' // Smooth scrolling animation
+      // })
     }, 2000);
 
     window.addEventListener('scroll', this.handleScroll);
 
     this.categories.forEach((item)=>{
       const position = this.getOffsetById(`category_${item.slug}`)
-      item.top = <number> position?.top + 136
+
+      item.top = <number> position?.top - 138
+      // item.left = <number> position?.left
     })
   },
   unmounted() {
@@ -179,10 +201,15 @@ export default defineComponent({
       return 0;
     },
     handleScroll() {
+      if (this.scrollBlocker) return
       this.scrollTop = document.documentElement.scrollTop;
-      this.selectedCategory = this.findIndex(this.categories.map((item) => item.top), this.scrollTop)
+      this.selectedCategory = this.findIndex([...this.categories.map((item) => item.top), 100000], this.scrollTop)
     },
     go(id: string, index: number) {
+      this.scrollBlocker = true
+      setTimeout(()=>{
+        this.scrollBlocker = false
+      }, 600)
       this.goTo(`#category_${id}`, {offset: -136, duration: 600, easing: 'easeInOutCubic'})
       this.selectedCategory = index
     },
@@ -236,7 +263,7 @@ export default defineComponent({
       </search-card>
     </v-container>
 
-    <v-col col="12" class="overflow-x-auto py-6 position-sticky cus-bg Flipped">
+    <v-col ref="categoryBtnContainer" id="category-btn-container" col="12" class="overflow-x-auto py-6 position-sticky cus-bg Flipped">
       <v-item-group selected-class="bg-primary" v-model="selectedCategory" class="px-3 Content">
         <v-row class="d-flex flex-row flex-nowrap">
           <div v-for="(item, index) in categories" :key="item.slug">
