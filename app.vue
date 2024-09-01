@@ -16,7 +16,7 @@ html{
 
 <template>
   <div>
-    <NuxtLoadingIndicator />
+<!--    <NuxtLoadingIndicator />-->
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
