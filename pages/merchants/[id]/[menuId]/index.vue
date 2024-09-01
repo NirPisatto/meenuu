@@ -5,16 +5,6 @@ import SearchCard from "~/components/merchant/search-card.vue";
 
 definePageMeta({
   layout: "merchant",
-  head: {
-    title: "Merchant Detail",
-    meta: [
-      {
-        hid: "description",
-        name: "description",
-        content: "Merchant Detail",
-      },
-    ],
-  },
 });
 
 export default defineComponent({

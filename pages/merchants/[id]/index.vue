@@ -3,18 +3,35 @@ import {defineComponent} from "vue";
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 import SearchCard from "~/components/merchant/search-card.vue";
 import BannerWindow from "~/components/merchant/banner-window.vue";
-// import {supabase} from "~/utils/supabase";
-// import {useGlobalStore} from "~/composables/useGlobalStore";
-
-// import {createClient} from '@supabase/supabase-js'
-// // // const config = useRuntimeConfig()
-// const supabase = createClient('https://bslarolteafwcomkvyxx.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzbGFyb2x0ZWFmd2NvbWt2eXh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTk5NzMzMjMsImV4cCI6MjAzNTU0OTMyM30.WXPSObkaj1FF7tbFMlvo2_j5RFMzoKTprnJxavlbKVg')
+import { useHead } from "@vueuse/head";
 
 
 export default defineComponent({
   name: "merchantDetailPage",
   components: {SearchCard, BannerCarousel, BannerWindow},
-  setup() {
+  setup(props) {
+    useHead({
+      title: props.merchant.name_en || props.merchant.name_km || "Merchant Details",
+      meta: [
+        {
+          name: "description",
+          content: `Explore the offerings of ${props.merchant.name_en || props.merchant.name_km}.`,
+        },
+        {
+          property: "og:title",
+          content: props.merchant.name_en || props.merchant.name_km,
+        },
+        {
+          property: "og:description",
+          content: `Check out the products and services offered by ${props.merchant.name_en || props.merchant.name_km}.`,
+        },
+        {
+          property: "og:image",
+          content: props.merchant.logo || "/images/default-logo.jpeg",
+        },
+      ],
+    });
+
     definePageMeta({
       layout: "merchant",
     });
