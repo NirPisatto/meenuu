@@ -7,7 +7,9 @@ export default defineComponent({
     return {
       merchant: {},
       categories: [],
+      banners: [],
       menu: {"id": 3},
+      isPageLoading: true,
     }
   },
   async created() {
@@ -22,8 +24,10 @@ export default defineComponent({
       if (data.value) {
         const merchant = data.value[0]
         this.merchant = merchant
+        this.banners = [{src: merchant?.promotion_banner}]
         this.categories = merchant.categories
       }
+      this.isPageLoading = false
     },
   },
 })
@@ -31,7 +35,7 @@ export default defineComponent({
 
 <template>
   <div>
-    <NuxtPage :merchant="merchant" :categories="categories" />
+    <NuxtPage :merchant="merchant" :categories="categories" :isPageLoading="isPageLoading" :banners="banners" />
   </div>
 </template>
 

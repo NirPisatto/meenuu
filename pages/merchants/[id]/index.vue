@@ -30,14 +30,20 @@ export default defineComponent({
       type: Array,
       required: true,
     },
+    banners: {
+      type: Array,
+      required: true,
+    },
+    isPageLoading: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
-      isPageLoading: true,
       scrollTop: 0,
       scrollBlocker: false,
       selectedCategory: 0,
-      banners: [],
       options: {
         duration: 300,
         easing: 'easeInOutCubic',
@@ -102,7 +108,7 @@ export default defineComponent({
 
 <template>
   <div>
-    <div>
+    <div v-if="!isPageLoading">
       <v-container>
         <v-app-bar :elevation="0" class="px-3" style="background-color: #FAFAFA">
           <template v-slot:prepend>
@@ -123,7 +129,6 @@ export default defineComponent({
         <v-spacer class="my-4 py-3"></v-spacer>
 
         <BannerWindow :banners="banners" height="120px"></BannerWindow>
-
         <search-card class="mt-3">
           <v-text-field
               placeholder="Search"
@@ -161,7 +166,6 @@ export default defineComponent({
         </v-item-group>
       </v-col>
       <div id="goto-container" v-for="category in categories" :key="category.id">
-
         <div :id="`category_${category.id}`" class="px-4">
           <p color="primary">{{ category.name_en }}</p>
         </div>
@@ -219,8 +223,18 @@ export default defineComponent({
         </v-container>
       </div>
     </div>
-    <div>
-
+    <div v-else>
+      <v-container content="center">
+        <v-row justify="center" class="mt-16 pt-16">
+          <v-progress-circular
+              color="primary"
+              model-value="20"
+              :size="128"
+              :width="12"
+              indeterminate
+          ></v-progress-circular>
+        </v-row>
+      </v-container>
     </div>
   </div>
 </template>

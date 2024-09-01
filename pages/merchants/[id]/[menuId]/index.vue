@@ -31,6 +31,7 @@ export default defineComponent({
   },
   data() {
     return {
+      isPageloading: true,
       onClickAnimation: false,
       selectedCategory: 0,
       menu: {},
@@ -59,6 +60,8 @@ export default defineComponent({
         this.banners = [{src: this.menu?.photo}]
       }
 
+      this.isPageloading = false;
+
     },
     copyUrl() {
       if (process.client) {
@@ -85,58 +88,73 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
-    <v-container>
 
-      <v-app-bar :elevation="0" class="px-3">
-        <template v-slot:prepend>
-          <v-btn
-              color="primary"
-              icon="mdi-arrow-left"
-              @click="handleGoBack"
-          ></v-btn>
-        </template>
-        <v-app-bar-title class="text-primary">
-          {{ menu.name_en }}
-        </v-app-bar-title>
+  <div v-if="!isPageloading">
+    <div>
+      <v-container>
+        <v-app-bar :elevation="0" class="px-3">
+          <template v-slot:prepend>
+            <v-btn
+                color="primary"
+                icon="mdi-arrow-left"
+                @click="handleGoBack"
+            ></v-btn>
+          </template>
+          <v-app-bar-title class="text-primary">
+            {{ menu.name_en }}
+          </v-app-bar-title>
 
-        <template v-slot:append>
-          <v-btn color="primary" icon="mdi-cart-outline"></v-btn>
-        </template>
-      </v-app-bar>
+          <template v-slot:append>
+            <v-btn color="primary" icon="mdi-cart-outline"></v-btn>
+          </template>
+        </v-app-bar>
 
-      <v-spacer class="my-4 py-3"></v-spacer>
+        <v-spacer class="my-4 py-3"></v-spacer>
 
-      <banner-carousel v-if="banners.length" :banners="banners" height="300px"></banner-carousel>
-      <div class="py-3">
+        <banner-carousel v-if="banners.length" :banners="banners" height="300px"></banner-carousel>
+        <div class="py-3">
       <span class="text-h5 text-primary">
        ID : {{ menu.code }}
       </span>
-      </div>
+        </div>
 
-      <v-card elevation="0" class="px-6 py-6" color="#5581B04D">
-        <v-row class="d-flex justify-between">
-          <p>{{ menu.name_en }}</p>
-          <v-spacer></v-spacer>
-          <v-btn variant="tonal" rounded :icon="onClickAnimation ? 'mdi-check' : 'mdi-link-variant'" density="compact"
-                 class="px-3"
-                 :color="onClickAnimation ? 'green green-accent-3':'primary'"
-                 @click="copyUrl">
+        <v-card elevation="0" class="px-6 py-6" color="#5581B04D">
+          <v-row class="d-flex justify-between">
+            <p>{{ menu.name_en }}</p>
+            <v-spacer></v-spacer>
+            <v-btn variant="tonal" rounded :icon="onClickAnimation ? 'mdi-check' : 'mdi-link-variant'" density="compact"
+                   class="px-3"
+                   :color="onClickAnimation ? 'green green-accent-3':'primary'"
+                   @click="copyUrl">
 
-          </v-btn>
-        </v-row>
+            </v-btn>
+          </v-row>
 
-        <v-row class="mt-9">
+          <v-row class="mt-9">
           <span class="text-subtitle-1 font-weight-regular">
            $ {{ menu.price_en }}
           </span>
-        </v-row>
-      </v-card>
+          </v-row>
+        </v-card>
 
-      <h4 class="mt-3">Description</h4>
-      <p>
-        {{ menu.description_en }}
-      </p>
+        <h4 class="mt-3">Description</h4>
+        <p>
+          {{ menu.description_en }}
+        </p>
+      </v-container>
+    </div>
+  </div>
+  <div v-else>
+    <v-container content="center">
+      <v-row justify="center" class="mt-16 pt-16">
+        <v-progress-circular
+            color="primary"
+            model-value="20"
+            :size="128"
+            :width="12"
+            indeterminate
+        ></v-progress-circular>
+      </v-row>
     </v-container>
   </div>
 </template>
