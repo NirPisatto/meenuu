@@ -19,7 +19,7 @@ export default defineComponent({
         </v-col>
         <v-col cols="12" class="d-flex flex-row justify-center">
           <v-btn
-            to="/merchants/demo-shop"
+            to="/merchants/freedomhealth"
             class="mt-6"
             color="primary"
             variant="outlined"

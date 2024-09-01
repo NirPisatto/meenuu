@@ -40,5 +40,14 @@ export default defineNuxtConfig({
         },
       },
     }
-  }
+  },
+  runtimeConfig: {
+    // The private keys which are only available within server-side
+    supabaseUrl: process.env.SUPABASE_URL || '',
+    supabaseToken: process.env.SUPABASE_KEY || '',
+    public:{
+      supabaseUrl: process.env.SUPABASE_URL || '',
+      supabaseToken: process.env.SUPABASE_KEY || '',
+    }
+  },
 })
