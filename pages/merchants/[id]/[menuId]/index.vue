@@ -20,6 +20,15 @@ definePageMeta({
 export default defineComponent({
   name: "merchantDetailPage",
   components: {SearchCard, BannerCarousel},
+  props: {
+    menuProps: {
+      type: Object,
+      required: false,
+      default: () => {
+        return null;
+      },
+    },
+  },
   data() {
     return {
       onClickAnimation: false,
@@ -36,13 +45,16 @@ export default defineComponent({
   },
   methods: {
     async getMenuById() {
+      if (this.menuProps) {
+        this.menu = this.menuProps;
+        this.banners = [{src: this.menu?.photo}];
+        return
+      }
       const {data} = await useFetch(`/api/merchants/${this.$route.params.id}/${this.$route.params.menuId}`, {
         method: "GET",
       });
       // const {data} = await this.$supabase.from('shops').select('*,categories(*,menus(*))').eq('slug', this.$route.params.id)
       if (data.value) {
-
-        console.log(data.value)
         this.menu = data.value[0]
         this.banners = [{src: this.menu?.photo}]
       }
@@ -61,7 +73,13 @@ export default defineComponent({
           console.error('Failed to copy URL:', err);
         });
       }
-    }
+    }, handleGoBack() {
+      if (window.history.length > 2) {
+        this.$router.go(-1);
+      } else {
+        this.$router.push(`/merchants/${this.$route.params.id}`);
+      }
+    },
   },
 });
 </script>
@@ -75,7 +93,7 @@ export default defineComponent({
           <v-btn
               color="primary"
               icon="mdi-arrow-left"
-              :to="`/merchants/${$route.params.id}`"
+              @click="handleGoBack"
           ></v-btn>
         </template>
         <v-app-bar-title class="text-primary">
