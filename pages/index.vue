@@ -1,5 +1,4 @@
 <script lang="ts">
-import { defineComponent } from "vue";
 definePageMeta({
   layout: "default",
 });
@@ -18,12 +17,7 @@ export default defineComponent({
           <h1 class="text-primary mt-12 pt-12">Coming Soon</h1>
         </v-col>
         <v-col cols="12" class="d-flex flex-row justify-center">
-          <v-btn
-            to="/merchants/freedomhealth"
-            class="mt-6"
-            color="primary"
-            variant="outlined"
-          >
+          <v-btn to="/merchants/freedomhealth" class="mt-6" color="primary" variant="outlined">
             <v-icon>mdi-store</v-icon> View Demo Shop
           </v-btn>
         </v-col>

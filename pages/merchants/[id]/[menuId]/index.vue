@@ -1,5 +1,4 @@
 <script lang="ts">
-import {defineComponent} from "vue";
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 import SearchCard from "~/components/merchant/search-card.vue";
 
@@ -9,7 +8,7 @@ definePageMeta({
 
 export default defineComponent({
   name: "merchantDetailPage",
-  components: {SearchCard, BannerCarousel},
+  components: { SearchCard, BannerCarousel },
   props: {
     menuProps: {
       type: Object,
@@ -38,16 +37,16 @@ export default defineComponent({
     async getMenuById() {
       if (this.menuProps) {
         this.menu = this.menuProps;
-        this.banners = [{src: this.menu?.photo}];
+        this.banners = [{ src: this.menu?.photo }];
         return
       }
-      const {data} = await useFetch(`/api/merchants/${this.$route.params.id}/${this.$route.params.menuId}`, {
+      const { data } = await useFetch(`/api/merchants/${this.$route.params.id}/${this.$route.params.menuId}`, {
         method: "GET",
       });
       // const {data} = await this.$supabase.from('shops').select('*,categories(*,menus(*))').eq('slug', this.$route.params.id)
       if (data.value) {
         this.menu = data.value[0]
-        this.banners = [{src: this.menu?.photo}]
+        this.banners = [{ src: this.menu?.photo }]
       }
 
       this.isPageloading = false;
@@ -78,17 +77,12 @@ export default defineComponent({
 </script>
 
 <template>
-
   <div v-if="!isPageloading">
     <div>
       <v-container>
         <v-app-bar :elevation="0" class="px-3">
           <template v-slot:prepend>
-            <v-btn
-                color="primary"
-                icon="mdi-arrow-left"
-                @click="handleGoBack"
-            ></v-btn>
+            <v-btn color="primary" icon="mdi-arrow-left" @click="handleGoBack"></v-btn>
           </template>
           <v-app-bar-title class="text-primary">
             {{ menu.name_en }}
@@ -103,9 +97,9 @@ export default defineComponent({
 
         <banner-carousel v-if="banners.length" :banners="banners" height="300px"></banner-carousel>
         <div class="py-3">
-      <span class="text-h5 text-primary">
-       ID : {{ menu.code }}
-      </span>
+          <span class="text-h5 text-primary">
+            ID : {{ menu.code }}
+          </span>
         </div>
 
         <v-card elevation="0" class="px-6 py-6" color="#5581B04D">
@@ -113,17 +107,15 @@ export default defineComponent({
             <p>{{ menu.name_en }}</p>
             <v-spacer></v-spacer>
             <v-btn variant="tonal" rounded :icon="onClickAnimation ? 'mdi-check' : 'mdi-link-variant'" density="compact"
-                   class="px-3"
-                   :color="onClickAnimation ? 'green green-accent-3':'primary'"
-                   @click="copyUrl">
+              class="px-3" :color="onClickAnimation ? 'green green-accent-3' : 'primary'" @click="copyUrl">
 
             </v-btn>
           </v-row>
 
           <v-row class="mt-9">
-          <span class="text-subtitle-1 font-weight-regular">
-           $ {{ menu.price_en }}
-          </span>
+            <span class="text-subtitle-1 font-weight-regular">
+              $ {{ menu.price_en }}
+            </span>
           </v-row>
         </v-card>
 
@@ -137,13 +129,7 @@ export default defineComponent({
   <div v-else>
     <v-container content="center">
       <v-row justify="center" class="mt-16 pt-16">
-        <v-progress-circular
-            color="primary"
-            model-value="20"
-            :size="128"
-            :width="12"
-            indeterminate
-        ></v-progress-circular>
+        <v-progress-circular color="primary" model-value="20" :size="128" :width="12" indeterminate></v-progress-circular>
       </v-row>
     </v-container>
   </div>

@@ -1,6 +1,4 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
-
 export default defineComponent({
   name: "maerchants",
   data() {
@@ -8,7 +6,7 @@ export default defineComponent({
       merchant: {},
       categories: [],
       banners: [],
-      menu: {"id": 3},
+      menu: { "id": 3 },
       isPageLoading: true,
     }
   },
@@ -17,14 +15,14 @@ export default defineComponent({
   },
   methods: {
     async getMenuByMerchant() {
-      const {data} = await useFetch(`/api/merchants/${this.$route.params.id}`, {
+      const { data } = await useFetch(`/api/merchants/${this.$route.params.id}`, {
         method: "GET",
       });
       // const {data} = await this.$supabase.from('shops').select('*,categories(*,menus(*))').eq('slug', this.$route.params.id)
       if (data.value) {
         const merchant = data.value[0]
         this.merchant = merchant
-        this.banners = [{src: merchant?.promotion_banner}]
+        this.banners = [{ src: merchant?.promotion_banner }]
         this.categories = merchant.categories
       }
       this.isPageLoading = false
@@ -39,6 +37,4 @@ export default defineComponent({
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

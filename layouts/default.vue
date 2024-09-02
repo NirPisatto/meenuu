@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { SpeedInsights } from "@vercel/speed-insights/nuxt"
-
 </script>
 
 <template>
@@ -15,9 +13,6 @@ import { SpeedInsights } from "@vercel/speed-insights/nuxt"
     </v-footer>
     <SpeedInsights />
   </div>
-
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

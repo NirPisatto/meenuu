@@ -1,15 +1,13 @@
 <script lang="ts">
-import {defineComponent} from "vue";
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 import SearchCard from "~/components/merchant/search-card.vue";
 import BannerWindow from "~/components/merchant/banner-window.vue";
-import { useHead } from "@vueuse/head";
 
 
 export default defineComponent({
   name: "merchantDetailPage",
-  components: {SearchCard, BannerCarousel, BannerWindow},
-  setup(props) {
+  components: { SearchCard, BannerCarousel, BannerWindow },
+  setup(props: any) {
     useHead({
       title: props.merchant.name_en || props.merchant.name_km || "Merchant Details",
       meta: [
@@ -36,7 +34,7 @@ export default defineComponent({
       layout: "merchant",
     });
     const goTo = useGoTo()
-    return {goTo}
+    return { goTo }
   },
   props: {
     merchant: {
@@ -58,6 +56,8 @@ export default defineComponent({
   },
   data() {
     return {
+      search: "",
+      internalCategories: [],
       scrollTop: 0,
       scrollBlocker: false,
       selectedCategory: 0,
@@ -66,6 +66,7 @@ export default defineComponent({
         easing: 'easeInOutCubic',
         offset: 0,
       },
+      firstLoad: true,
     };
   },
   created() {
@@ -78,17 +79,53 @@ export default defineComponent({
     }, 2000);
 
     window.addEventListener('scroll', this.handleScroll);
+    this.internalCategories = this.categories;
 
-    this.categories.forEach((item) => {
+    this.categories.forEach((item: any) => {
       const position = this.getOffsetById(`category_${item.id}`)
       item.top = <number>position?.top - 138
     })
+  },
+  watch: {
+    categories(val: any) {
+      if (this.firstLoad) {
+        this.internalCategories = val;
+        this.firstLoad = false
+      }
+    },
+    search(val: string) {
+      if (val) {
+        this.internalCategories = this.filterMenuItems(this.categories, val);
+        return;
+      }
+
+      this.internalCategories = this.categories;
+    },
   },
   unmounted() {
     // Remove scroll event listener when the component is destroyed
     window.removeEventListener('scroll', this.handleScroll);
   },
   methods: {
+    filterMenuItems(data: Array<any>, searchString: string) {
+      // Convert search string to lowercase for case-insensitive search
+      const lowerCaseSearchString = searchString.toLowerCase();
+
+      // Filter the data structure
+      return data.map(category => {
+        const filteredMenus = category.menus.filter(menu => {
+          const nameEnMatches = menu.name_en && menu.name_en.toLowerCase().includes(lowerCaseSearchString);
+          const nameKhMatches = menu.name_kh && menu.name_kh.toLowerCase().includes(lowerCaseSearchString);
+          const idMatches = menu.id.toString().includes(searchString);
+          return nameEnMatches || nameKhMatches || idMatches;
+        });
+
+        return {
+          ...category,
+          menus: filteredMenus
+        };
+      }).filter(category => category.menus.length > 0); // Remove categories with no matching menus
+    },
     findIndex(arr: number[], current: number) {
       for (let i = 0; i < arr.length; i++) {
         if (current >= arr[i] && current < arr[i + 1]) {
@@ -100,14 +137,14 @@ export default defineComponent({
     handleScroll() {
       if (this.scrollBlocker) return
       this.scrollTop = document.documentElement.scrollTop;
-      this.selectedCategory = this.findIndex([...this.categories.map((item) => item.top), 100000], this.scrollTop)
+      this.selectedCategory = this.findIndex([...this.categories.map((item: any) => item.top), 100000], this.scrollTop)
     },
     go(id: string, index: number) {
       this.scrollBlocker = true
       setTimeout(() => {
         this.scrollBlocker = false
       }, 600)
-      this.goTo(`#category_${id}`, {offset: -136, duration: 600, easing: 'easeInOutCubic'})
+      this.goTo(`#category_${id}`, { offset: -136, duration: 600, easing: 'easeInOutCubic' })
       this.selectedCategory = index
     },
     getOffsetById(id: string) {
@@ -144,37 +181,21 @@ export default defineComponent({
         </v-app-bar>
 
         <v-spacer class="my-4 py-3"></v-spacer>
-
         <BannerWindow :banners="banners" height="120px"></BannerWindow>
         <search-card class="mt-3">
-          <v-text-field
-              placeholder="Search"
-              color="primary"
-              variant="outlined"
-              clearable
-              hide-details
-              bg-color="white"
-              prepend-inner-icon="mdi-magnify"
-              density="compact"
-              class="mb-2 rounded text-title-case"
-          >
+          <v-text-field v-model="search" placeholder="Search" color="primary" variant="outlined" clearable hide-details
+            bg-color="white" prepend-inner-icon="mdi-magnify" density="compact" class="mb-2 rounded text-title-case">
           </v-text-field>
         </search-card>
       </v-container>
       <v-col ref="categoryBtnContainer" id="category-btn-container" col="12"
-             class="overflow-x-auto py-6 position-sticky cus-bg Flipped">
+        class="overflow-x-auto py-6 position-sticky cus-bg Flipped">
         <v-item-group selected-class="bg-primary" v-model="selectedCategory" class="px-3 Content">
           <v-row class="d-flex flex-row flex-nowrap">
-            <div v-for="(item, index) in categories" :key="item.id">
+            <div v-for="(item, index) in internalCategories" :key="item.id">
               <v-item v-slot="{ isSelected, selectedClass, toggle }">
-                <v-btn
-                    :prepend-icon="item.icon"
-                    size="large"
-                    :color="isSelected ? 'primary' : 'grey'"
-                    variant="outlined"
-                    @click="go(item.id, index)"
-                    class="mr-3 rounded-lg"
-                >
+                <v-btn :prepend-icon="item.icon" size="large" :color="isSelected ? 'primary' : 'grey'" variant="outlined"
+                  @click="go(item.id, index)" class="mr-3 rounded-lg">
                   {{ item.name_en }}
                 </v-btn>
               </v-item>
@@ -182,42 +203,19 @@ export default defineComponent({
           </v-row>
         </v-item-group>
       </v-col>
-      <div id="goto-container" v-for="category in categories" :key="category.id">
+      <div id="goto-container" v-for="category in internalCategories" :key="category.id">
         <div :id="`category_${category.id}`" class="px-4">
           <p color="primary">{{ category.name_en }}</p>
         </div>
         <v-container class="pt-0">
           <v-row class="px-1 mt-0">
-            <v-col
-                cols="6"
-                sm="4"
-                md="4"
-                lg="3"
-                class="mb-0 px-2"
-                v-for="(item,index) in category.menus"
-                :key="item.id"
-            >
-              <v-card
-                  :to="`/merchants/${$route.params.id}/${item.id}`"
-                  class="rounded-lg py-2 px-2 d-flex flex-column justify-space-between"
-                  style="height: 100%"
-                  variant="outlined"
-                  color="primary"
-                  data-aos="fade-up"
-                  data-aos-offset="0"
-                  :data-aos-delay="20*index"
-                  data-aos-duration="400"
-                  data-aos-easing="ease-in-out"
-                  data-aos-once="true"
-                  data-aos-mirror="false"
-              >
+            <v-col cols="6" sm="4" md="4" lg="3" class="mb-0 px-2" v-for="(item, index) in category.menus" :key="item.id">
+              <v-card :to="`/merchants/${$route.params.id}/${item.id}`"
+                class="rounded-lg py-2 px-2 d-flex flex-column justify-space-between" style="height: 100%"
+                variant="outlined" color="primary" data-aos="fade-up" data-aos-offset="0" :data-aos-delay="20 * index"
+                data-aos-duration="400" data-aos-easing="ease-in-out" data-aos-once="true" data-aos-mirror="false">
                 <div>
-                  <v-img
-                      :src="item.photo"
-                      height="160px"
-                      cover
-                      class="rounded-lg"
-                  ></v-img>
+                  <v-img :src="item.photo" height="160px" cover class="rounded-lg"></v-img>
 
                   <v-card-subtitle class="text-caption px-0 mt-2 text-primary">
                     ID : {{ item.code }}
@@ -229,9 +227,9 @@ export default defineComponent({
 
                 <div class="px-3 my-3">
                   <v-row>
-                  <span class="text-subtitle-1 font-weight-regular">
-                    $ {{ item.price_en }} | R {{ item.price_kh }}
-                  </span>
+                    <span class="text-subtitle-1 font-weight-regular">
+                      $ {{ item.price_en }} | R {{ item.price_kh }}
+                    </span>
                   </v-row>
                 </div>
               </v-card>
@@ -239,17 +237,30 @@ export default defineComponent({
           </v-row>
         </v-container>
       </div>
+      <div v-if="internalCategories.length <= 0" class="mt-6">
+        <v-row>
+          <v-col cols="12" class="text-center">
+            <v-row justify="center">
+              <v-icon size="100" color="primary">mdi-alert-circle-outline</v-icon>
+
+            </v-row>
+            <v-row justify="center">
+              <p class="text-subtitle-1 mt-3" color="primary">
+                No items found
+              </p>
+            </v-row>
+            <v-row justify="center">
+              <v-btn color="primary" variant="flat" class="mt-3" @click="search = ''">Clear Search</v-btn>
+            </v-row>
+          </v-col>
+        </v-row>
+      </div>
     </div>
     <div v-else>
       <v-container content="center">
         <v-row justify="center" class="mt-16 pt-16">
-          <v-progress-circular
-              color="primary"
-              model-value="20"
-              :size="128"
-              :width="12"
-              indeterminate
-          ></v-progress-circular>
+          <v-progress-circular color="primary" model-value="20" :size="128" :width="12"
+            indeterminate></v-progress-circular>
         </v-row>
       </v-container>
     </div>
@@ -266,10 +277,12 @@ export default defineComponent({
   z-index: 20001;
 }
 
-.Flipped, .Flipped .Content {
+.Flipped,
+.Flipped .Content {
   transform: rotateX(180deg);
-  -ms-transform: rotateX(180deg); /* IE 9 */
-  -webkit-transform: rotateX(180deg); /* Safari and Chrome */
+  -ms-transform: rotateX(180deg);
+  /* IE 9 */
+  -webkit-transform: rotateX(180deg);
+  /* Safari and Chrome */
 }
-
 </style>
