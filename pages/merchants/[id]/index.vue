@@ -56,6 +56,7 @@ export default defineComponent({
   },
   data() {
     return {
+      tabData: 0,
       search: "",
       internalCategories: [],
       scrollTop: 0,
@@ -76,15 +77,16 @@ export default defineComponent({
 
     setTimeout(() => {
       this.selectedCategory = 0
-    }, 2000);
+      this.categories.forEach((item: any) => {
+        const position = this.getOffsetById(`category_${item.id}`)
+        item.top = <number>position?.top - 138
+      })
+    }, 1000);
 
     window.addEventListener('scroll', this.handleScroll);
     this.internalCategories = this.categories;
 
-    this.categories.forEach((item: any) => {
-      const position = this.getOffsetById(`category_${item.id}`)
-      item.top = <number>position?.top - 138
-    })
+
   },
   watch: {
     categories(val: any) {
@@ -138,9 +140,11 @@ export default defineComponent({
       if (this.scrollBlocker) return
       this.scrollTop = document.documentElement.scrollTop;
       this.selectedCategory = this.findIndex([...this.categories.map((item: any) => item.top), 100000], this.scrollTop)
+      this.tabData = this.selectedCategory
     },
     go(id: string, index: number) {
       this.scrollBlocker = true
+      this.tabData = index
       setTimeout(() => {
         this.scrollBlocker = false
       }, 600)
@@ -190,18 +194,32 @@ export default defineComponent({
       </v-container>
       <v-col ref="categoryBtnContainer" id="category-btn-container" col="12"
         class="overflow-x-auto py-6 position-sticky cus-bg Flipped">
-        <v-item-group selected-class="bg-primary" v-model="selectedCategory" class="px-3 Content">
-          <v-row class="d-flex flex-row flex-nowrap">
-            <div v-for="(item, index) in internalCategories" :key="item.id">
-              <v-item v-slot="{ isSelected, selectedClass, toggle }">
-                <v-btn :prepend-icon="item.icon" size="large" :color="isSelected ? 'primary' : 'grey'" variant="outlined"
-                  @click="go(item.id, index)" class="mr-3 rounded-lg">
-                  {{ item.name_en }}
-                </v-btn>
-              </v-item>
-            </div>
-          </v-row>
-        </v-item-group>
+        <v-tabs
+            v-model="tabData"
+            center-active
+        >
+          <v-tab v-for="(item, index) in internalCategories" class="mx-1 cus-tab-class" selected-class="cus-selected-class" rounded :key="index" :value="index" border="flase" color="primary" @click="go(item.id, index)">
+            {{ item.name_en }}
+<!--            <v-btn :prepend-icon="item.icon" size="large" variant="outlined"-->
+<!--                   @click="go(item.id, index)" class="mr-3 rounded-lg">-->
+<!--              {{ item.name_en }}-->
+<!--            </v-btn>-->
+          </v-tab>
+        </v-tabs>
+
+
+<!--        <v-item-group selected-class="bg-primary" v-model="selectedCategory" class="px-3 Content">-->
+<!--          <v-row class="d-flex flex-row flex-nowrap">-->
+<!--            <div v-for="(item, index) in internalCategories" :key="item.id">-->
+<!--              <v-item v-slot="{ isSelected, selectedClass, toggle }">-->
+<!--                <v-btn :prepend-icon="item.icon" size="large" :color="isSelected ? 'primary' : 'grey'" variant="outlined"-->
+<!--                  @click="go(item.id, index)" class="mr-3 rounded-lg">-->
+<!--                  {{ item.name_en }}-->
+<!--                </v-btn>-->
+<!--              </v-item>-->
+<!--            </div>-->
+<!--          </v-row>-->
+<!--        </v-item-group>-->
       </v-col>
       <div id="goto-container" v-for="category in internalCategories" :key="category.id">
         <div :id="`category_${category.id}`" class="px-4">
@@ -270,19 +288,22 @@ export default defineComponent({
 <style>
 .cus-bg {
   background: rgb(255, 255, 255);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5130427170868348) 0%, rgba(250, 250, 250, 1) 16%);
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.5130427170868348) 0%, rgba(250, 250, 250, 1) 16%);
   top: 64px;
   left: 0px;
   right: 0px;
   z-index: 20001;
 }
 
-.Flipped,
-.Flipped .Content {
-  transform: rotateX(180deg);
-  -ms-transform: rotateX(180deg);
-  /* IE 9 */
-  -webkit-transform: rotateX(180deg);
-  /* Safari and Chrome */
+.cus-tab-class{
+  border-radius: 8px !important;
+  border: 1px solid rgba(0, 0, 0, 0.30) !important;
 }
+
+
+.cus-selected-class{
+  border-radius: 8px !important;
+  border: 1px solid #5581B0 !important;
+}
+
 </style>
