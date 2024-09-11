@@ -56,25 +56,20 @@ const banners = ref<Banner[]>([]);
 // };
 
 const { data: menuData, pending, error } = useAsyncData(async () => {
-  if (menuProps.menuProps) {
-    menu.value = menuProps.menuProps;
-    banners.value = [{ src: menu.value?.photo } as Banner];
-    return menu.value;
-  }
-
   const { data } = await useFetch(`/api/merchants/${route.params.id}/${route.params.menuId}`, {
     method: "GET",
   });
 
   return data.value ? data.value[0] : null;
-});
+}, { immediate: true });
 
-// watch(menuData, (newMenuData) => {
-//   if (newMenuData) {
-//     menu.value = newMenuData;
-//     banners.value = [{ src: menu.value?.photo } as Banner];
-//   }
-// });
+// Watch for menuData changes and assign to menu ref
+watch(menuData, (newValue) => {
+  if (newValue) {
+    menu.value = menuData.value;
+    banners.value = [{ src: menu.value?.photo } as Banner];
+  }
+});
 
 // When merchant data is available, populate the refs
 if (menuData.value) {
