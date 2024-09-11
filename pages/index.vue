@@ -1,12 +1,15 @@
-<script lang="ts">
+<script lang="ts" setup>
+const {locale, setLocale} = useI18n()
+
 definePageMeta({
   layout: "default",
 });
+</script>
 
-
-export default defineComponent({
-  name: "homaPage",
-});
+<script lang="ts">
+export default {
+  name: "homePage",
+};
 </script>
 
 <template>
@@ -18,7 +21,8 @@ export default defineComponent({
         </v-col>
         <v-col cols="12" class="d-flex flex-row justify-center">
           <v-btn to="/merchants/freedomhealth" class="mt-6" color="primary" variant="outlined">
-            <v-icon>mdi-store</v-icon> View Demo Shop
+            <v-icon>mdi-store</v-icon>
+            View Demo Shop
           </v-btn>
         </v-col>
       </v-row>

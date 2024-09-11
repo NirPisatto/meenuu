@@ -12,7 +12,7 @@ export default defineComponent({
       <v-row>
         <v-col cols="12">
           <p class="mb-2">
-            Find your favorite food
+            {{ $t('merchant.find_your_favorite_food') }}
           </p>
           <slot></slot>
         </v-col>

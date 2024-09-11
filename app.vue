@@ -3,14 +3,14 @@ $body-font-family: 'Abel';
 $title-font: 'Abel';
 
 .v-application {
-  font-family: 'Abel', sans-serif !important;
+  font-family: 'Abel', sans-serif, 'Noto Sans Khmer' !important;
   .title {
-    font-family: 'Abel', sans-serif !important;
+    font-family: 'Abel', sans-serif, 'Noto Sans Khmer' !important;
   }
 }
 
 html{
-  font-family: 'Abel', sans-serif !important;
+  font-family: 'Abel', sans-serif, 'Noto Sans Khmer' !important;
 }
 </style>
 

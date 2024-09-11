@@ -27,8 +27,12 @@ export default defineNuxtConfig({
       Abel: true,
       Roboto: true,
       Lato: true,
+      'Noto Sans Khmer': true,
     }
-  }], 'nuxt-aos'],
+  }], 'nuxt-aos', '@nuxtjs/i18n'],
+  i18n: {
+    vueI18n: './i18n.config.ts', // if you are using custom path, default
+  },
   vuetify: {
     moduleOptions: {
     },

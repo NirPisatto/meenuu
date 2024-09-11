@@ -1,168 +1,204 @@
-<script lang="ts">
+<script lang="ts" setup>
+import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { useHead, useGoTo } from '#imports';
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 import SearchCard from "~/components/merchant/search-card.vue";
 import BannerWindow from "~/components/merchant/banner-window.vue";
 
+interface Category {
+  id: number;
+  name_en: string;
+  name_km: string;
+  menus: Menu[];
+  top?: number;
+}
 
-export default defineComponent({
-  name: "merchantDetailPage",
-  components: { SearchCard, BannerCarousel, BannerWindow },
-  setup(props: any) {
-    useHead({
-      title: props.merchant.name_en || props.merchant.name_km || "Merchant Details",
-      meta: [
-        {
-          name: "description",
-          content: `Explore the offerings of ${props.merchant.name_en || props.merchant.name_km}.`,
-        },
-        {
-          property: "og:title",
-          content: props.merchant.name_en || props.merchant.name_km,
-        },
-        {
-          property: "og:description",
-          content: `Check out the products and services offered by ${props.merchant.name_en || props.merchant.name_km}.`,
-        },
-        {
-          property: "og:image",
-          content: props.merchant.logo || "/images/default-logo.jpeg",
-        },
-      ],
-    });
+interface Menu {
+  id: number;
+  name_en: string;
+  name_km: string;
+  code: string;
+  photo: string;
+  price_en: number;
+  price_kh: number;
+}
 
-    definePageMeta({
-      layout: "merchant",
-    });
-    const goTo = useGoTo()
-    return { goTo }
+const props = defineProps({
+  merchant: {
+    type: Object,
+    required: true,
   },
-  props: {
-    merchant: {
-      type: Object,
-      required: true,
+  categories: {
+    type: Array,
+    required: true,
+  },
+  banners: {
+    type: Array,
+    required: true,
+  },
+  isPageLoading: {
+    type: Boolean,
+    required: true,
+  },
+});
+
+const tabData = ref(0);
+const search = ref('');
+const internalCategories = ref<Category[]>([]);
+const scrollTop = ref(0);
+const scrollBlocker = ref(false);
+const selectedCategory = ref(0);
+const firstLoad = ref(true);
+const searching = ref(false);
+
+
+const options = ref({
+  duration: 300,
+  easing: 'easeInOutCubic',
+  offset: 0,
+});
+
+const goTo = useGoTo();
+
+useHead({
+  title: props.merchant.name_en || props.merchant.name_km || "Merchant Details",
+  meta: [
+    {
+      name: "description",
+      content: `Explore the offerings of ${props.merchant.name_en || props.merchant.name_km}.`,
     },
-    categories: {
-      type: Array,
-      required: true,
+    {
+      property: "og:title",
+      content: props.merchant.name_en || props.merchant.name_km,
     },
-    banners: {
-      type: Array,
-      required: true,
+    {
+      property: "og:description",
+      content: `Check out the products and services offered by ${props.merchant.name_en || props.merchant.name_km}.`,
     },
-    isPageLoading: {
-      type: Boolean,
-      required: true,
+    {
+      property: "og:image",
+      content: props.merchant.logo || "/images/default-logo.jpeg",
     },
-  },
-  data() {
-    return {
-      tabData: 0,
-      search: "",
-      internalCategories: [],
-      scrollTop: 0,
-      scrollBlocker: false,
-      selectedCategory: 0,
-      options: {
-        duration: 300,
-        easing: 'easeInOutCubic',
-        offset: 0,
-      },
-      firstLoad: true,
-    };
-  },
-  created() {
-    // this.getMenuByMerchant()
-  },
-  mounted() {
+  ],
+});
 
-    setTimeout(() => {
-      this.selectedCategory = 0
-      this.categories.forEach((item: any) => {
-        const position = this.getOffsetById(`category_${item.id}`)
-        item.top = <number>position?.top - 138
-      })
-    }, 1000);
+definePageMeta({
+  layout: "merchant",
+});
 
-    window.addEventListener('scroll', this.handleScroll);
-    this.internalCategories = this.categories;
+const filterMenuItems = (data: Array<any>, searchString: string) => {
+  const lowerCaseSearchString = searchString.toLowerCase();
 
-
-  },
-  watch: {
-    categories(val: any) {
-      if (this.firstLoad) {
-        this.internalCategories = val;
-        this.firstLoad = false
-      }
-    },
-    search(val: string) {
-      if (val) {
-        this.internalCategories = this.filterMenuItems(this.categories, val);
-        return;
-      }
-
-      this.internalCategories = this.categories;
-    },
-  },
-  unmounted() {
-    // Remove scroll event listener when the component is destroyed
-    window.removeEventListener('scroll', this.handleScroll);
-  },
-  methods: {
-    filterMenuItems(data: Array<any>, searchString: string) {
-      // Convert search string to lowercase for case-insensitive search
-      const lowerCaseSearchString = searchString.toLowerCase();
-
-      // Filter the data structure
-      return data.map(category => {
-        const filteredMenus = category.menus.filter(menu => {
+  return data
+      .map((category) => {
+        const filteredMenus = category.menus.filter((menu: Menu) => {
           const nameEnMatches = menu.name_en && menu.name_en.toLowerCase().includes(lowerCaseSearchString);
-          const nameKhMatches = menu.name_kh && menu.name_kh.toLowerCase().includes(lowerCaseSearchString);
+          const nameKhMatches = menu.name_km && menu.name_km.toLowerCase().includes(lowerCaseSearchString);
           const idMatches = menu.id.toString().includes(searchString);
           return nameEnMatches || nameKhMatches || idMatches;
         });
 
         return {
           ...category,
-          menus: filteredMenus
+          menus: filteredMenus,
         };
-      }).filter(category => category.menus.length > 0); // Remove categories with no matching menus
-    },
-    findIndex(arr: number[], current: number) {
-      for (let i = 0; i < arr.length; i++) {
-        if (current >= arr[i] && current < arr[i + 1]) {
-          return i;
-        }
-      }
-      return 0;
-    },
-    handleScroll() {
-      if (this.scrollBlocker) return
-      this.scrollTop = document.documentElement.scrollTop;
-      this.selectedCategory = this.findIndex([...this.categories.map((item: any) => item.top), 100000], this.scrollTop)
-      this.tabData = this.selectedCategory
-    },
-    go(id: string, index: number) {
-      this.scrollBlocker = true
-      this.tabData = index
-      setTimeout(() => {
-        this.scrollBlocker = false
-      }, 600)
-      this.goTo(`#category_${id}`, { offset: -136, duration: 600, easing: 'easeInOutCubic' })
-      this.selectedCategory = index
-    },
-    getOffsetById(id: string) {
-      const item = document.getElementById(id)
-      if (!item) return
-      const rect = item.getBoundingClientRect();
-      return {
-        left: rect.left + window.scrollX,
-        top: rect.top + window.scrollY
-      };
+      })
+      .filter((category) => category.menus.length > 0);
+};
+
+const findIndex = (arr: number[], current: number) => {
+  for (let i = 0; i < arr.length; i++) {
+    if (current >= arr[i] && current < arr[i + 1]) {
+      return i;
     }
-  },
+  }
+  return 0;
+};
+
+const handleScroll = () => {
+  if (scrollBlocker.value) return;
+  scrollTop.value = document.documentElement.scrollTop;
+  selectedCategory.value = findIndex(
+      [...props.categories.map((item: any) => item.top), 100000],
+      scrollTop.value
+  );
+  tabData.value = selectedCategory.value;
+};
+
+
+
+const switchLang = (val: string) => {
+  $i18n.setLocale(val)
+}
+
+
+const go = (id: string, index: number) => {
+  scrollBlocker.value = true;
+  tabData.value = index;
+  setTimeout(() => {
+    scrollBlocker.value = false;
+  }, 600);
+  goTo(`#category_${id}`, { offset: -136, duration: 600, easing: 'easeInOutCubic' });
+  selectedCategory.value = index;
+};
+
+const getOffsetById = (id: string) => {
+  const item = document.getElementById(id);
+  if (!item) return;
+  const rect = item.getBoundingClientRect();
+  return {
+    left: rect.left + window.scrollX,
+    top: rect.top + window.scrollY,
+  };
+};
+
+onMounted(() => {
+  setTimeout(() => {
+    selectedCategory.value = 0;
+    props.categories.forEach((item: any) => {
+      const position = getOffsetById(`category_${item.id}`);
+      item.top = <number>position?.top - 138;
+    });
+  }, 1000);
+
+  window.addEventListener('scroll', handleScroll);
+  internalCategories.value = props.categories as Category[];
+});
+
+watch(
+    () => props.categories,
+    (val) => {
+      if (firstLoad.value) {
+        internalCategories.value = val as Category[];
+        firstLoad.value = false;
+      }
+    }
+);
+
+watch(search, (val: string) => {
+  if (val) {
+    if (searching.value == false) {
+      searching.value = true;
+      setTimeout(() => {
+        internalCategories.value = filterMenuItems(props.categories, val);
+        props.categories.forEach((item: any) => {
+          const position = getOffsetById(`category_${item.id}`);
+          item.top = <number>position?.top - 138;
+        });
+        searching.value = false;
+      }, 500);
+    }
+    return;
+  }
+  internalCategories.value = props.categories as Category[];
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
 });
 </script>
+
 
 <template>
   <div>
@@ -187,19 +223,19 @@ export default defineComponent({
         <v-spacer class="my-4 py-3"></v-spacer>
         <BannerWindow :banners="banners" height="120px"></BannerWindow>
         <search-card class="mt-3">
-          <v-text-field v-model="search" placeholder="Search" color="primary" variant="outlined" clearable hide-details
+          <v-text-field v-model="search" :placeholder="$t('merchant.search')" color="primary" variant="outlined" clearable hide-details
             bg-color="white" prepend-inner-icon="mdi-magnify" density="compact" class="mb-2 rounded text-title-case">
           </v-text-field>
         </search-card>
       </v-container>
       <v-col ref="categoryBtnContainer" id="category-btn-container" col="12"
-        class="overflow-x-auto py-6 position-sticky cus-bg Flipped">
+        class="overflow-x-auto py-3 position-sticky cus-bg Flipped">
         <v-tabs
             v-model="tabData"
             center-active
         >
           <v-tab v-for="(item, index) in internalCategories" class="mx-1 cus-tab-class" selected-class="cus-selected-class" rounded :key="index" :value="index" border="flase" color="primary" @click="go(item.id, index)">
-            {{ item.name_en }}
+            {{ $i18n.locale === 'en' ? item.name_en : item.name_km }}
 <!--            <v-btn :prepend-icon="item.icon" size="large" variant="outlined"-->
 <!--                   @click="go(item.id, index)" class="mr-3 rounded-lg">-->
 <!--              {{ item.name_en }}-->
@@ -223,7 +259,7 @@ export default defineComponent({
       </v-col>
       <div id="goto-container" v-for="category in internalCategories" :key="category.id">
         <div :id="`category_${category.id}`" class="px-4">
-          <p color="primary">{{ category.name_en }}</p>
+          <p color="primary"> {{ $i18n.locale === 'en' ? category.name_en : category.name_km }} </p>
         </div>
         <v-container class="pt-0">
           <v-row class="px-1 mt-0">
@@ -236,17 +272,17 @@ export default defineComponent({
                   <v-img :src="item.photo" height="160px" cover class="rounded-lg"></v-img>
 
                   <v-card-subtitle class="text-caption px-0 mt-2 text-primary">
-                    ID : {{ item.code }}
+                    ID : {{ item.code || $t('N/A') }}
                   </v-card-subtitle>
                   <v-card-title class="text-h6 px-0 pt-0 font-weight-regular text-black text-wrap">
-                    {{ item.name_en }}
+                    {{ $i18n.locale === 'en' ? item.name_en : item.name_km }}
                   </v-card-title>
                 </div>
 
                 <div class="px-3 my-3">
                   <v-row>
                     <span class="text-subtitle-1 font-weight-regular">
-                      $ {{ item.price_en }} | R {{ item.price_kh }}
+                      $ {{ item.price_en }} - R {{ item.price_kh || $t('N/A') }}
                     </span>
                   </v-row>
                 </div>
@@ -255,12 +291,12 @@ export default defineComponent({
           </v-row>
         </v-container>
       </div>
+
       <div v-if="internalCategories.length <= 0" class="mt-6">
         <v-row>
           <v-col cols="12" class="text-center">
             <v-row justify="center">
               <v-icon size="100" color="primary">mdi-alert-circle-outline</v-icon>
-
             </v-row>
             <v-row justify="center">
               <p class="text-subtitle-1 mt-3" color="primary">
@@ -273,6 +309,10 @@ export default defineComponent({
           </v-col>
         </v-row>
       </div>
+
+      <v-spacer class="my-16 py-16">
+        <v-spacer class="my-16 py-6"></v-spacer>
+      </v-spacer>
     </div>
     <div v-else>
       <v-container content="center">
