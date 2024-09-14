@@ -16,7 +16,7 @@ html{
 
 <template>
   <div>
-<!--    <NuxtLoadingIndicator />-->
+    <NuxtLoadingIndicator color="#27639c" />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useFetch } from '#imports'; // Adjust the import based on your project's setup
+import {ref, onMounted} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import {useFetch} from '#imports'; // Adjust the import based on your project's setup
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 
 
@@ -55,26 +55,30 @@ const banners = ref<Banner[]>([]);
 //   // isPageloading.value = false;
 // };
 
-const { data: menuData, pending, error } = useAsyncData(async () => {
-  const { data } = await useFetch(`/api/merchants/${route.params.id}/${route.params.menuId}`, {
-    method: "GET",
-  });
+const {
+  data: menuData,
+  pending
+} = await useFetch(`/api/merchants/${route.params.id}/${route.params.menuId}`, {lazy: true})
 
-  return data.value ? data.value[0] : null;
-}, { immediate: true });
+// const { data: menuData, pending, error } = useAsyncData(async () => {
+//   const { data } = await useFetch(`/api/merchants/${route.params.id}/${route.params.menuId}`, {
+//     method: "GET",
+//   });
+//
+//   return data.value ? data.value[0] : null;
+// }, { immediate: true });
 
 // Watch for menuData changes and assign to menu ref
 watch(menuData, (newValue) => {
   if (newValue) {
-    menu.value = menuData.value;
+    menu.value = newValue[0];
     banners.value = [{ src: menu.value?.photo } as Banner];
   }
 });
 
-// When merchant data is available, populate the refs
 if (menuData.value) {
-  menu.value = menuData.value;
-  banners.value = [{ src: menu.value?.photo } as Banner];
+  menu.value = menuData.value[0];
+  banners.value = [{src: menu.value?.photo} as Banner];
 }
 
 const copyUrl = () => {
@@ -106,7 +110,7 @@ const handleGoBack = () => {
 // });
 </script>
 <template>
-  <div v-if="!isPageloading">
+  <div v-if="!pending">
     <div>
       <v-container>
         <v-app-bar :elevation="0" class="px-3">
@@ -126,9 +130,9 @@ const handleGoBack = () => {
 
         <banner-carousel v-if="banners.length" :banners="banners" height="300px"></banner-carousel>
         <div class="py-3">
-          <span class="text-h5 text-primary">
-            ID : {{ menu.code }}
-          </span>
+              <span class="text-h5 text-primary">
+                ID : {{ menu.code }}
+              </span>
         </div>
 
         <v-card elevation="0" class="px-6 py-6" color="#5581B04D">
@@ -136,15 +140,15 @@ const handleGoBack = () => {
             <p> {{ $i18n.locale === 'en' ? menu.name_en : menu.name_km }}</p>
             <v-spacer></v-spacer>
             <v-btn variant="tonal" rounded :icon="onClickAnimation ? 'mdi-check' : 'mdi-link-variant'" density="compact"
-              class="px-3" :color="onClickAnimation ? 'green green-accent-3' : 'primary'" @click="copyUrl">
+                   class="px-3" :color="onClickAnimation ? 'green green-accent-3' : 'primary'" @click="copyUrl">
 
             </v-btn>
           </v-row>
 
           <v-row class="mt-9">
-            <span class="text-subtitle-1 font-weight-regular">
-              $ {{ menu.price_en }}
-            </span>
+                <span class="text-subtitle-1 font-weight-regular">
+                  $ {{ menu.price_en }}
+                </span>
           </v-row>
         </v-card>
 
