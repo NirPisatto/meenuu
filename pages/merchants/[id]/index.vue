@@ -5,44 +5,52 @@ import { useHead, useGoTo } from '#imports';
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 import SearchCard from "~/components/merchant/search-card.vue";
 import BannerWindow from "~/components/merchant/banner-window.vue";
+import { useMenuStore } from '~/store/merchant'
+import type {Category} from "~/types";
+const merchantStore = useMenuStore()
+const merchant = merchantStore.merchant
+const categories = merchantStore.categories
+const banners = merchantStore.getBanners
 
-interface Category {
-  id: number;
-  name_en: string;
-  name_km: string;
-  menus: Menu[];
-  top?: number;
-}
 
-interface Menu {
-  id: number;
-  name_en: string;
-  name_km: string;
-  code: string;
-  photo: string;
-  price_en: number;
-  price_kh: number;
-}
-
-const props = defineProps({
-  merchant: {
-    type: Object,
-    required: true,
-  },
-  categories: {
-    type: Array,
-    required: true,
-  },
-  banners: {
-    type: Array,
-    required: true,
-  },
-  isPageLoading: {
-    type: Boolean,
-    required: true,
-  },
-});
-
+//
+// interface Category {
+//   id: number;
+//   name_en: string;
+//   name_km: string;
+//   menus: Menu[];
+//   top?: number;
+// }
+//
+// interface Menu {
+//   id: number;
+//   name_en: string;
+//   name_km: string;
+//   code: string;
+//   photo: string;
+//   price_en: number;
+//   price_kh: number;
+// }
+//
+// const props = defineProps({
+//   merchant: {
+//     type: Object,
+//     required: true,
+//   },
+//   categories: {
+//     type: Array,
+//     required: true,
+//   },
+//   banners: {
+//     type: Array,
+//     required: true,
+//   },
+//   isPageLoading: {
+//     type: Boolean,
+//     required: true,
+//   },
+// });
+//
 const tabData = ref(0);
 const search = ref('');
 const internalCategories = ref<Category[]>([]);
@@ -62,23 +70,23 @@ const options = ref({
 const goTo = useGoTo();
 
 useHead({
-  title: props.merchant.name_en || props.merchant.name_km || "Merchant Details",
+  title: merchant?.name_en || merchant?.name_km || "Merchant Details",
   meta: [
     {
       name: "description",
-      content: `Explore the offerings of ${props.merchant.name_en || props.merchant.name_km}.`,
+      content: `Explore the offerings of ${merchant?.name_en || merchant?.name_km}.`,
     },
     {
       property: "og:title",
-      content: props.merchant.name_en || props.merchant.name_km,
+      content: merchant?.name_en || merchant?.name_km,
     },
     {
       property: "og:description",
-      content: `Check out the products and services offered by ${props.merchant.name_en || props.merchant.name_km}.`,
+      content: `Check out the products and services offered by ${merchant?.name_en || merchant?.name_km}.`,
     },
     {
       property: "og:image",
-      content: props.merchant.logo || "/images/default-logo.jpeg",
+      content: merchant?.logo || "/images/default-logo.jpeg",
     },
   ],
 });
@@ -92,7 +100,7 @@ const filterMenuItems = (data: Array<any>, searchString: string) => {
 
   return data
       .map((category) => {
-        const filteredMenus = category.menus.filter((menu: Menu) => {
+        const filteredMenus = category.menus.filter((menu: any) => {
           const nameEnMatches = menu.name_en && menu.name_en.toLowerCase().includes(lowerCaseSearchString);
           const nameKhMatches = menu.name_km && menu.name_km.toLowerCase().includes(lowerCaseSearchString);
           const idMatches = menu.id.toString().includes(searchString);
@@ -120,18 +128,16 @@ const handleScroll = () => {
   if (scrollBlocker.value) return;
   scrollTop.value = document.documentElement.scrollTop;
   selectedCategory.value = findIndex(
-      [...props.categories.map((item: any) => item.top), 100000],
+      [...categories.map((item: any) => item.top), 100000],
       scrollTop.value
   );
   tabData.value = selectedCategory.value;
 };
 
 
-
 const switchLang = (val: string) => {
   $i18n.setLocale(val)
 }
-
 
 const go = (id: string, index: number) => {
   scrollBlocker.value = true;
@@ -156,18 +162,18 @@ const getOffsetById = (id: string) => {
 onMounted(() => {
   setTimeout(() => {
     selectedCategory.value = 0;
-    props.categories.forEach((item: any) => {
+    categories.forEach((item: any) => {
       const position = getOffsetById(`category_${item.id}`);
       item.top = <number>position?.top - 138;
     });
   }, 1000);
 
   window.addEventListener('scroll', handleScroll);
-  internalCategories.value = props.categories as Category[];
+  internalCategories.value = categories as Category[];
 });
 
 watch(
-    () => props.categories,
+    () => categories,
     (val) => {
       if (firstLoad.value) {
         internalCategories.value = val as Category[];
@@ -181,8 +187,8 @@ watch(search, (val: string) => {
     if (searching.value == false) {
       searching.value = true;
       setTimeout(() => {
-        internalCategories.value = filterMenuItems(props.categories, val);
-        props.categories.forEach((item: any) => {
+        internalCategories.value = filterMenuItems(categories, val);
+        categories.forEach((item: any) => {
           const position = getOffsetById(`category_${item.id}`);
           item.top = <number>position?.top - 138;
         });
@@ -191,29 +197,29 @@ watch(search, (val: string) => {
     }
     return;
   }
-  internalCategories.value = props.categories as Category[];
+  internalCategories.value = categories as Category[];
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
 });
-</script>
 
+</script>
 
 <template>
   <div>
-    <div v-if="!isPageLoading">
+    <div v-if="!merchantStore.getIsLoading">
       <v-container>
         <v-app-bar :elevation="0" class="px-3" style="background-color: #FAFAFA">
           <template v-slot:prepend>
             <nuxt-link to="/" class="text-decoration-none">
               <v-avatar border="0">
-                <v-img alt="merchant logo" :src="merchant.logo || '/images/logo.jpeg'"></v-img>
+                <v-img alt="merchant logo" :src="merchant?.logo || '/images/logo.jpeg'"></v-img>
               </v-avatar>
             </nuxt-link>
           </template>
           <v-app-bar-title class="text-primary">
-            {{ merchant.name_en || merchant.name_km || 'N/A' }}
+            {{ merchant?.name_en || merchant?.name_km || 'N/A' }}
           </v-app-bar-title>
           <template v-slot:append>
             <v-btn color="primary" icon="mdi-cart-outline"></v-btn>
@@ -223,7 +229,7 @@ onUnmounted(() => {
         <v-spacer class="my-4 py-3"></v-spacer>
         <BannerWindow :banners="banners" height="120px"></BannerWindow>
         <search-card class="mt-3">
-          <v-text-field v-model="search" :placeholder="$t('merchant.search')" color="primary" variant="outlined" clearable hide-details
+          <v-text-field v-model="search" :placeholder="$t('merchant?.search')" color="primary" variant="outlined" clearable hide-details
             bg-color="white" prepend-inner-icon="mdi-magnify" density="compact" class="mb-2 rounded text-title-case">
           </v-text-field>
         </search-card>

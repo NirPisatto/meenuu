@@ -10,10 +10,12 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@pinia/nuxt": "^0.5.4",
     "@supabase/supabase-js": "^2.45.3",
     "@vercel/speed-insights": "^1.0.12",
     "@vueuse/head": "^2.0.0",
     "nuxt": "^3.12.4",
+    "pinia": "^2.2.2",
     "vue": "latest"
   },
   "devDependencies": {
