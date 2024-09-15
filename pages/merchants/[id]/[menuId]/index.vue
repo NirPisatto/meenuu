@@ -162,10 +162,6 @@ const handleAddToCart = () => {
                  :color="onClickAnimation ? 'green green-accent-3' : 'primary'" @click="copyUrl">
 
           </v-btn>
-          <v-btn class="ml-3" variant="tonal" color="primary" icon size="small"
-                 @click.stop="merchantStore.addToCart(menu as MenuItem)">
-            <v-icon>mdi-cart-plus</v-icon>
-          </v-btn>
         </v-row>
 
         <v-row class="mt-9">
