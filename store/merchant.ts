@@ -1,21 +1,25 @@
 import {defineStore} from 'pinia'
 import {useNuxtApp} from '#app';
-import type {MenuItem, Merchant, Category} from "~/types";
+import type {MenuItem, Merchant, Category, CartItem} from "~/types";
 
 
 export const useMenuStore = defineStore("menu", {
     state: (): {
-        menus: MenuItem[];
-        merchant: Merchant | null;
-        categories: Category[];
+        menus: MenuItem[],
+        merchant: Merchant | null,
+        categories: Category[],
         isLoading: boolean,
-        isError: boolean
+        isError: boolean,
+        carts: CartItem[],
+        showCart: boolean
     } => ({
         menus: [],
         merchant: null,
         categories: [],
         isLoading: true,
-        isError: false
+        isError: false,
+        carts: [],
+        showCart: false
     }),
     getters: {
         allMenus: (state) => state.menus,
@@ -42,5 +46,28 @@ export const useMenuStore = defineStore("menu", {
                 this.isLoading = false
             }
         },
+        addToCart(item: CartItem){
+            const cartItem = this.carts.find(cart => cart.menu_id === item.menu_id)
+            if (cartItem) {
+                cartItem.quantity = item.quantity + cartItem.quantity
+            } else {
+                this.carts.push(item)
+            }
+        },
+        removeFromCart(item: CartItem){
+            const cartItem = this.carts.find(cart => cart.menu_id === item.menu_id)
+            if (cartItem) {
+                cartItem.quantity = cartItem.quantity - item.quantity
+                if (cartItem.quantity <= 0) {
+                    this.carts = this.carts.filter(cart => cart.menu_id !== item.menu_id)
+                }
+            }
+        },
+        showCartModal(){
+            this.showCart = true
+        },
+        hideCartModal(){
+            this.showCart = false
+        }
     }
 })

@@ -9,7 +9,8 @@ export default defineI18nConfig(() => ({
                 find_your_favorite_food: 'Find your favorite food',
                 search: 'Search'
             },
-            'N/A': 'N/A'
+            'N/A': 'N/A',
+            cart: 'Cart',
         },
         km: {
             welcome: 'សួស្តី',
@@ -17,7 +18,8 @@ export default defineI18nConfig(() => ({
                 find_your_favorite_food: 'ស្វែងរកអាហារដែលអ្នកចូលចិត្ត',
                 search: 'ស្វែងរក'
             },
-            'N/A': 'N/A'
+            'N/A': 'N/A',
+            cart: 'រទេះ',
         }
     }
 }))

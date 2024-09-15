@@ -50,4 +50,10 @@ interface Merchant {
     categories: Category[];
 }
 
-export type { MenuItem, Category, Merchant };
+interface CartItem {
+    menu_id: number;
+    quantity: number;
+    item: MenuItem;
+}
+
+export type {MenuItem, Category, Merchant, CartItem};

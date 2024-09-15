@@ -1,56 +1,19 @@
 <script lang="ts" setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue';
-import { useRoute } from 'vue-router';
-import { useHead, useGoTo } from '#imports';
+import {ref, watch, onMounted, onUnmounted} from 'vue';
+import {useRoute} from 'vue-router';
+import {useHead, useGoTo} from '#imports';
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 import SearchCard from "~/components/merchant/search-card.vue";
 import BannerWindow from "~/components/merchant/banner-window.vue";
-import { useMenuStore } from '~/store/merchant'
+import {useMenuStore} from '~/store/merchant'
 import type {Category} from "~/types";
+
 const merchantStore = useMenuStore()
 const merchant = merchantStore.merchant
 const categories = merchantStore.categories
 const banners = merchantStore.getBanners
 
 
-//
-// interface Category {
-//   id: number;
-//   name_en: string;
-//   name_km: string;
-//   menus: Menu[];
-//   top?: number;
-// }
-//
-// interface Menu {
-//   id: number;
-//   name_en: string;
-//   name_km: string;
-//   code: string;
-//   photo: string;
-//   price_en: number;
-//   price_kh: number;
-// }
-//
-// const props = defineProps({
-//   merchant: {
-//     type: Object,
-//     required: true,
-//   },
-//   categories: {
-//     type: Array,
-//     required: true,
-//   },
-//   banners: {
-//     type: Array,
-//     required: true,
-//   },
-//   isPageLoading: {
-//     type: Boolean,
-//     required: true,
-//   },
-// });
-//
 const tabData = ref(0);
 const search = ref('');
 const internalCategories = ref<Category[]>([]);
@@ -60,29 +23,23 @@ const selectedCategory = ref(0);
 const firstLoad = ref(true);
 const searching = ref(false);
 
-
-const options = ref({
-  duration: 300,
-  easing: 'easeInOutCubic',
-  offset: 0,
-});
-
+const route = useRoute();
 const goTo = useGoTo();
 
 useHead({
-  title: merchant?.name_en || merchant?.name_km || "Merchant Details",
+  title: merchant?.name_en || merchant?.name_kh || "Merchant Details",
   meta: [
     {
       name: "description",
-      content: `Explore the offerings of ${merchant?.name_en || merchant?.name_km}.`,
+      content: `Explore the offerings of ${merchant?.name_en || merchant?.name_kh}.`,
     },
     {
       property: "og:title",
-      content: merchant?.name_en || merchant?.name_km,
+      content: merchant?.name_en || merchant?.name_kh,
     },
     {
       property: "og:description",
-      content: `Check out the products and services offered by ${merchant?.name_en || merchant?.name_km}.`,
+      content: `Check out the products and services offered by ${merchant?.name_en || merchant?.name_kh}.`,
     },
     {
       property: "og:image",
@@ -145,7 +102,7 @@ const go = (id: string, index: number) => {
   setTimeout(() => {
     scrollBlocker.value = false;
   }, 600);
-  goTo(`#category_${id}`, { offset: -136, duration: 600, easing: 'easeInOutCubic' });
+  goTo(`#category_${id}`, {offset: -136, duration: 600, easing: 'easeInOutCubic'});
   selectedCategory.value = index;
 };
 
@@ -219,61 +176,68 @@ onUnmounted(() => {
             </nuxt-link>
           </template>
           <v-app-bar-title class="text-primary">
-            {{ merchant?.name_en || merchant?.name_km || 'N/A' }}
+            {{ merchant?.name_en || merchant?.name_kh || 'N/A' }}
           </v-app-bar-title>
           <template v-slot:append>
-            <v-btn color="primary" icon="mdi-cart-outline"></v-btn>
+              <v-btn color="primary" @click="merchantStore.showCartModal()" class="text-none" icon size="large">
+                <v-badge color="error" :content="merchantStore.carts.length">
+                  <v-icon>mdi-cart-outline</v-icon>
+                </v-badge>
+              </v-btn>
           </template>
         </v-app-bar>
 
         <v-spacer class="my-4 py-3"></v-spacer>
-        <BannerWindow :banners="banners" height="120px"></BannerWindow>
+        <BannerWindow :banners="banners as any" height="120px"></BannerWindow>
         <search-card class="mt-3">
-          <v-text-field v-model="search" :placeholder="$t('merchant?.search')" color="primary" variant="outlined" clearable hide-details
-            bg-color="white" prepend-inner-icon="mdi-magnify" density="compact" class="mb-2 rounded text-title-case">
+          <v-text-field v-model="search" :placeholder="$t('merchant?.search')" color="primary" variant="outlined"
+                        clearable hide-details
+                        bg-color="white" prepend-inner-icon="mdi-magnify" density="compact"
+                        class="mb-2 rounded text-title-case">
           </v-text-field>
         </search-card>
       </v-container>
       <v-col ref="categoryBtnContainer" id="category-btn-container" col="12"
-        class="overflow-x-auto py-3 position-sticky cus-bg Flipped">
+             class="overflow-x-auto py-3 position-sticky cus-bg Flipped" style="z-index: 100">
         <v-tabs
             v-model="tabData"
             center-active
         >
-          <v-tab v-for="(item, index) in internalCategories" class="mx-1 cus-tab-class" selected-class="cus-selected-class" rounded :key="index" :value="index" border="flase" color="primary" @click="go(item.id, index)">
-            {{ $i18n.locale === 'en' ? item.name_en : item.name_km }}
-<!--            <v-btn :prepend-icon="item.icon" size="large" variant="outlined"-->
-<!--                   @click="go(item.id, index)" class="mr-3 rounded-lg">-->
-<!--              {{ item.name_en }}-->
-<!--            </v-btn>-->
+          <v-tab v-for="(item, index) in internalCategories" class="mx-1 cus-tab-class"
+                 selected-class="cus-selected-class" rounded :key="index" :value="index" border="flase"
+                 color="primary" @click="go(item.id, index)">
+            {{ $i18n.locale === 'en' ? item.name_en : item.name_kh }}
           </v-tab>
         </v-tabs>
 
 
-<!--        <v-item-group selected-class="bg-primary" v-model="selectedCategory" class="px-3 Content">-->
-<!--          <v-row class="d-flex flex-row flex-nowrap">-->
-<!--            <div v-for="(item, index) in internalCategories" :key="item.id">-->
-<!--              <v-item v-slot="{ isSelected, selectedClass, toggle }">-->
-<!--                <v-btn :prepend-icon="item.icon" size="large" :color="isSelected ? 'primary' : 'grey'" variant="outlined"-->
-<!--                  @click="go(item.id, index)" class="mr-3 rounded-lg">-->
-<!--                  {{ item.name_en }}-->
-<!--                </v-btn>-->
-<!--              </v-item>-->
-<!--            </div>-->
-<!--          </v-row>-->
-<!--        </v-item-group>-->
+        <!--        <v-item-group selected-class="bg-primary" v-model="selectedCategory" class="px-3 Content">-->
+        <!--          <v-row class="d-flex flex-row flex-nowrap">-->
+        <!--            <div v-for="(item, index) in internalCategories" :key="item.id">-->
+        <!--              <v-item v-slot="{ isSelected, selectedClass, toggle }">-->
+        <!--                <v-btn :prepend-icon="item.icon" size="large" :color="isSelected ? 'primary' : 'grey'" variant="outlined"-->
+        <!--                  @click="go(item.id, index)" class="mr-3 rounded-lg">-->
+        <!--                  {{ item.name_en }}-->
+        <!--                </v-btn>-->
+        <!--              </v-item>-->
+        <!--            </div>-->
+        <!--          </v-row>-->
+        <!--        </v-item-group>-->
       </v-col>
       <div id="goto-container" v-for="category in internalCategories" :key="category.id">
         <div :id="`category_${category.id}`" class="px-4">
-          <p color="primary"> {{ $i18n.locale === 'en' ? category.name_en : category.name_km }} </p>
+          <p color="primary"> {{ $i18n.locale === 'en' ? category.name_en : category.name_kh }} </p>
         </div>
         <v-container class="pt-0">
           <v-row class="px-1 mt-0">
-            <v-col cols="6" sm="4" md="4" lg="3" class="mb-0 px-2" v-for="(item, index) in category.menus" :key="item.id">
+            <v-col cols="6" sm="4" md="4" lg="3" class="mb-0 px-2" v-for="(item, index) in category.menus"
+                   :key="item.id">
               <v-card :to="`/merchants/${$route.params.id}/${item.id}`"
-                class="rounded-lg py-2 px-2 d-flex flex-column justify-space-between" style="height: 100%"
-                variant="outlined" color="primary" data-aos="fade-up" data-aos-offset="0" :data-aos-delay="20 * index"
-                data-aos-duration="400" data-aos-easing="ease-in-out" data-aos-once="true" data-aos-mirror="false">
+                      class="rounded-lg py-2 px-2 d-flex flex-column justify-space-between" style="height: 100%"
+                      variant="outlined" color="primary" data-aos="fade-up" data-aos-offset="0"
+                      :data-aos-delay="20 * index"
+                      data-aos-duration="400" data-aos-easing="ease-in-out" data-aos-once="true"
+                      data-aos-mirror="false">
                 <div>
                   <v-img :src="item.photo" height="160px" cover class="rounded-lg"></v-img>
 
@@ -281,17 +245,22 @@ onUnmounted(() => {
                     ID : {{ item.code || $t('N/A') }}
                   </v-card-subtitle>
                   <v-card-title class="text-h6 px-0 pt-0 font-weight-regular text-black text-wrap">
-                    {{ $i18n.locale === 'en' ? item.name_en : item.name_km }}
+                    {{ $i18n.locale === 'en' ? item.name_en : item.name_kh }}
                   </v-card-title>
                 </div>
 
-                <div class="px-3 my-3">
+
+
+                <v-card-actions class="px-3">
                   <v-row>
-                    <span class="text-subtitle-1 font-weight-regular">
+                    <span class="text-subtitle-1 font-weight-regular py-auto">
                       $ {{ item.price_en }} - R {{ item.price_kh || $t('N/A') }}
                     </span>
+<!--                    <v-btn icon class="ml-auto" size="small" @click.stop="merchantStore.addToCart(item)">-->
+<!--                      <v-icon>mdi-cart-plus</v-icon>-->
+<!--                    </v-btn>-->
                   </v-row>
-                </div>
+                </v-card-actions>
               </v-card>
             </v-col>
           </v-row>
@@ -324,7 +293,7 @@ onUnmounted(() => {
       <v-container content="center">
         <v-row justify="center" class="mt-16 pt-16">
           <v-progress-circular color="primary" model-value="20" :size="128" :width="12"
-            indeterminate></v-progress-circular>
+                               indeterminate></v-progress-circular>
         </v-row>
       </v-container>
     </div>
@@ -341,13 +310,13 @@ onUnmounted(() => {
   z-index: 20001;
 }
 
-.cus-tab-class{
+.cus-tab-class {
   border-radius: 8px !important;
   border: 1px solid rgba(0, 0, 0, 0.30) !important;
 }
 
 
-.cus-selected-class{
+.cus-selected-class {
   border-radius: 8px !important;
   border: 1px solid #5581B0 !important;
 }
