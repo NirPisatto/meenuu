@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {ref, watch, onMounted, onUnmounted} from 'vue';
-import {useRoute} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import {useHead, useGoTo} from '#imports';
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
 import SearchCard from "~/components/merchant/search-card.vue";
@@ -24,6 +24,7 @@ const firstLoad = ref(true);
 const searching = ref(false);
 
 const route = useRoute();
+const router = useRouter();
 const goTo = useGoTo();
 
 useHead({
@@ -161,6 +162,12 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
 });
 
+
+const handleOnClickCard = (item: any) => {
+  merchantStore.setCurrentMenu(item);
+  router.push(`/merchants/${route.params.id}/${item.id}`);
+};
+
 </script>
 
 <template>
@@ -179,11 +186,11 @@ onUnmounted(() => {
             {{ merchant?.name_en || merchant?.name_kh || 'N/A' }}
           </v-app-bar-title>
           <template v-slot:append>
-              <v-btn color="primary" @click="merchantStore.showCartModal()" class="text-none" icon size="large">
-                <v-badge color="error" :content="merchantStore.carts.length">
-                  <v-icon>mdi-cart-outline</v-icon>
-                </v-badge>
-              </v-btn>
+            <v-btn v-if="merchant?.allow_order" color="primary" @click="merchantStore.showCartModal()" class="text-none" icon size="large">
+              <v-badge color="error" :content="merchantStore.carts.length">
+                <v-icon>mdi-cart-outline</v-icon>
+              </v-badge>
+            </v-btn>
           </template>
         </v-app-bar>
 
@@ -232,7 +239,7 @@ onUnmounted(() => {
           <v-row class="px-1 mt-0">
             <v-col cols="6" sm="4" md="4" lg="3" class="mb-0 px-2" v-for="(item, index) in category.menus"
                    :key="item.id">
-              <v-card :to="`/merchants/${$route.params.id}/${item.id}`"
+              <v-card @click="handleOnClickCard(item)"
                       class="rounded-lg py-2 px-2 d-flex flex-column justify-space-between" style="height: 100%"
                       variant="outlined" color="primary" data-aos="fade-up" data-aos-offset="0"
                       :data-aos-delay="20 * index"
@@ -248,19 +255,11 @@ onUnmounted(() => {
                     {{ $i18n.locale === 'en' ? item.name_en : item.name_kh }}
                   </v-card-title>
                 </div>
-
-
-
-                <v-card-actions class="px-3">
-                  <v-row>
-                    <span class="text-subtitle-1 font-weight-regular py-auto">
-                      $ {{ item.price_en }} - R {{ item.price_kh || $t('N/A') }}
+                <div>
+                    <span class="text-subtitle-1 font-weight-regular py-0">
+                      $ {{ item.price_en }} {{ item.price_kh ? `| R ${item.price_kh}` : '' }}
                     </span>
-<!--                    <v-btn icon class="ml-auto" size="small" @click.stop="merchantStore.addToCart(item)">-->
-<!--                      <v-icon>mdi-cart-plus</v-icon>-->
-<!--                    </v-btn>-->
-                  </v-row>
-                </v-card-actions>
+                </div>
               </v-card>
             </v-col>
           </v-row>
