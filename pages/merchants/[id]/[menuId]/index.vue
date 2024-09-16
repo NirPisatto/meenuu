@@ -1,93 +1,45 @@
 <script lang="ts" setup>
 import {ref, onMounted} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
-import {useFetch} from '#imports'; // Adjust the import based on your project's setup
 import BannerCarousel from "~/components/merchant/banner-carousel.vue";
-import { VNumberInput } from 'vuetify/labs/VNumberInput'
+import {VNumberInput} from 'vuetify/labs/VNumberInput'
 
 import {useMenuStore} from "~/store/merchant";
 import type {CartItem, MenuItem} from "~/types";
 
+export interface Banner {
+  src: string;
+}
 
 
 const merchantStore = useMenuStore()
+const menu = merchantStore.currentMenu
+const merchant = merchantStore.merchant
 const count = ref(1);
 
-interface Banner {
-  src: string;
-  photo: string;
-}
 
+const router = useRouter();
+const route = useRoute();
 definePageMeta({
   layout: "merchant",
 });
 
 
-const route = useRoute();
-const router = useRouter();
+const {pending} = await useAsyncData(
+    async () => {
+      if(merchantStore.currentMenu){
+        return
+      }
+      return await merchantStore.fetchMenu(route.params.menuId as string);
+    }, {lazy: true}
+);
 
-const menuProps = defineProps({
-  menuProps: {
-    type: Object,
-    required: false,
-    default: () => null,
-  },
-});
-
-const isPageloading = ref(false);
 const onClickAnimation = ref(false);
-const selectedCategory = ref(0);
-const menu = ref({});
-const merchant = ref({
-  name: "MeeNuu Demo Merchant",
-});
 const banners = ref<Banner[]>([]);
 
-// const getMenuById = async () => {
-//   if (menuProps.menuProps) {
-//     menu.value = menuProps.menuProps;
-//     banners.value = [{ src: menu.value?.photo } as Banner];
-//     return;
-//   }
-//
-//   const { data } = await useFetch(`/api/merchants/${route.params.id}/${route.params.menuId}`, {
-//     method: "GET",
-//   });
-//   // const {data} = await this.$supabase.from('shops').select('*,categories(*,menus(*))').eq('slug', route.params.id)
-//
-//   if (data.value) {
-//     menu.value = data.value[0];
-//     banners.value = [{ src: menu.value?.photo } as Banner];
-//   }
-//
-//   // isPageloading.value = false;
-// };
-
-const {
-  data: menuData,
-  pending
-} = await useFetch(`/api/merchants/${route.params.id}/${route.params.menuId}`, {lazy: true})
-
-// const { data: menuData, pending, error } = useAsyncData(async () => {
-//   const { data } = await useFetch(`/api/merchants/${route.params.id}/${route.params.menuId}`, {
-//     method: "GET",
-//   });
-//
-//   return data.value ? data.value[0] : null;
-// }, { immediate: true });
-
-// Watch for menuData changes and assign to menu ref
-watch(menuData, (newValue) => {
-  if (newValue) {
-    menu.value = newValue[0];
-    banners.value = [{src: menu.value?.photo} as Banner];
-  }
+onMounted(async () => {
+  banners.value = [{src: merchantStore.currentMenu?.photo as string}] as Banner[];
 });
-
-if (menuData.value) {
-  menu.value = menuData.value[0];
-  banners.value = [{src: menu.value?.photo} as Banner];
-}
 
 const copyUrl = () => {
   if (process.client) {
@@ -114,7 +66,7 @@ const handleGoBack = () => {
 };
 
 const handleAddToCart = () => {
-  const item: CartItem = { menu_id: menu.value.id as number, quantity: count.value, item: menu.value as MenuItem };
+  const item: CartItem = {menu_id: menu?.id as number, quantity: count.value, item: menu as MenuItem};
   merchantStore.addToCart(item);
   handleGoBack();
 };
@@ -125,14 +77,13 @@ const handleAddToCart = () => {
 </script>
 <template>
   <div v-if="!pending">
-
     <v-container height="100wh">
       <v-app-bar :elevation="0" class="px-3">
         <template v-slot:prepend>
           <v-btn color="primary" icon="mdi-arrow-left" @click="handleGoBack"></v-btn>
         </template>
         <v-app-bar-title class="text-primary">
-          {{ $i18n.locale === 'en' ? menu.name_en : menu.name_km }}
+          {{ $i18n.locale === 'en' ? merchantStore.currentMenu?.name_en : merchantStore.currentMenu?.name_kh }}
         </v-app-bar-title>
 
         <!--          <template v-slot:append>-->
@@ -149,13 +100,13 @@ const handleAddToCart = () => {
       <banner-carousel v-if="banners.length" :banners="banners" height="300px"></banner-carousel>
       <div class="py-3">
               <span class="text-h5 text-primary">
-                ID : {{ menu.code }}
+                ID : {{ merchantStore.currentMenu?.code || $t('N/A') }}
               </span>
       </div>
 
       <v-card elevation="0" class="px-6 py-6" color="#5581B04D">
         <v-row class="d-flex justify-between">
-          <p> {{ $i18n.locale === 'en' ? menu.name_en : menu.name_km }}</p>
+          <p> {{ $i18n.locale === 'en' ? merchantStore.currentMenu?.name_en : merchantStore.currentMenu?.name_kh }}</p>
           <v-spacer></v-spacer>
 
           <v-btn size="small" variant="tonal" rounded :icon="onClickAnimation ? 'mdi-check' : 'mdi-link-variant'"
@@ -166,14 +117,16 @@ const handleAddToCart = () => {
 
         <v-row class="mt-9">
                 <span class="text-subtitle-1 font-weight-regular">
-                  $ {{ menu.price_en }}
+                  $ {{ merchantStore.currentMenu?.price_en }}
                 </span>
         </v-row>
       </v-card>
 
       <h4 class="mt-3">Description</h4>
       <p>
-        {{ $i18n.locale === 'en' ? menu.description_en : menu.description_km }}
+        {{
+          $i18n.locale === 'en' ? merchantStore.currentMenu?.description_en : merchantStore.currentMenu?.description_kh
+        }}
       </p>
 
 
@@ -187,7 +140,7 @@ const handleAddToCart = () => {
       </v-row>
     </v-container>
   </div>
-  <div class="place-order-container py-3 px-3">
+  <div v-if="merchant?.allow_order" class="place-order-container py-3 px-3">
     <v-number-input
         v-model="count"
         :reverse="false"
