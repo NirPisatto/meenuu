@@ -268,9 +268,9 @@ const handleOnClickCard = (item: any) => {
 
       <div v-if="internalCategories.length <= 0" class="mt-6">
         <v-row>
-          <v-col cols="12" class="text-center">
+          <v-col cols="12" class="text-center mt-10">
             <v-row justify="center">
-              <v-icon size="100" color="primary">mdi-alert-circle-outline</v-icon>
+              <v-icon size="34" color="primary">mdi-alert-circle-outline</v-icon>
             </v-row>
             <v-row justify="center">
               <p class="text-subtitle-1 mt-3" color="primary">

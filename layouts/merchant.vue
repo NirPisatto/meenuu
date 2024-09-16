@@ -4,7 +4,7 @@
 
 <template>
   <v-app style="background-color: #FAFAFA">
-    <v-container max-width="1200px" min-height="100vh" n class="px-0" >
+    <v-container max-width="1200px" min-height="100vh" class="px-0" >
       <slot />
     </v-container>
   </v-app>
