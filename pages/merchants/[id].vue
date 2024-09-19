@@ -63,6 +63,10 @@ const calculateTotalPriceInRiel = computed(() => {
   }, 0);
 });
 
+watch(() => merchantStore.showCart, (val) => {
+  merchantStore.handleCleanCart()
+});
+
 </script>
 
 <template>
@@ -71,6 +75,7 @@ const calculateTotalPriceInRiel = computed(() => {
     <NuxtPage/>
 
     <v-dialog
+        v-if="merchantStore.showCart"
         v-model="merchantStore.showCart"
         fullscreen
         persistent
@@ -90,7 +95,7 @@ const calculateTotalPriceInRiel = computed(() => {
                 v-if="merchantStore.carts.length > 0"
                 height="80vh"
                 :items="merchantStore.carts">
-              <template v-slot:default="{ item }" >
+              <template v-slot:default="{ item }">
                 <div class="pb-4">
                   <v-card variant="outlined" color="primary">
                     <div class="d-flex">
@@ -162,6 +167,7 @@ const calculateTotalPriceInRiel = computed(() => {
                 <v-btn
                     size="large"
                     color="primary"
+                    @click="merchantStore.showPlaceOrderModel()"
                 >
                   {{ $t('checkout') }}
                 </v-btn>
@@ -170,6 +176,47 @@ const calculateTotalPriceInRiel = computed(() => {
           </div>
         </v-container>
       </v-app>
+    </v-dialog>
+
+    <v-dialog
+        v-model="merchantStore.showPlaceOrder"
+        max-width="400"
+        persistent
+    >
+      <v-card :loading="merchantStore.isOrdering" :disabled="merchantStore.isOrdering">
+        <template v-slot:title>
+          <div>
+            <h4 class="font-weight-bold">
+              Are you sure you want to place an order?
+            </h4>
+
+          </div>
+        </template>
+        <template v-slot:text>
+          <div>
+            <p>
+              By clicking "Yes", you will place an order to the merchant.
+            </p>
+
+            <v-textarea class="mt-3" label="Note" v-model="merchantStore.note" variant="outlined">
+
+            </v-textarea>
+          </div>
+        </template>
+        <v-divider></v-divider>
+
+        <template v-slot:actions>
+          <v-spacer></v-spacer>
+
+          <v-btn size="large" variant="outlined" @click="merchantStore.hidePlaceOrderModel()">
+            No
+          </v-btn>
+
+          <v-btn size="large" variant="flat" color="primary" @click="merchantStore.placeOrder()">
+            Yes
+          </v-btn>
+        </template>
+      </v-card>
     </v-dialog>
   </div>
 </template>
