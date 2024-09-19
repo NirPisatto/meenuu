@@ -47,6 +47,26 @@ const {data: merchantData, error} = await useAsyncData(
     }
 );
 
+const calculateTotalPrice = computed(() => {
+  return merchantStore.carts.reduce((acc, item) => {
+    const price = 12;
+    const quantity = item.quantity;
+    return acc + (price * quantity);
+  }, 0);
+});
+
+const calculateTotalPriceInRiel = computed(() => {
+  return merchantStore.carts.reduce((acc, item) => {
+    const price = 12;
+    const quantity = item.quantity;
+    return acc + (price * quantity);
+  }, 0);
+});
+
+watch(() => merchantStore.showCart, (val) => {
+  merchantStore.handleCleanCart()
+});
+
 </script>
 
 <template>
@@ -55,11 +75,12 @@ const {data: merchantData, error} = await useAsyncData(
     <NuxtPage/>
 
     <v-dialog
+        v-if="merchantStore.showCart"
         v-model="merchantStore.showCart"
         fullscreen
         persistent
     >
-      <v-app>
+      <v-app min-height="100vh">
         <v-app-bar :elevation="0" class="px-3">
           <template v-slot:prepend>
             <v-btn color="primary" icon="mdi-arrow-left" @click="merchantStore.hideCartModal()"></v-btn>
@@ -68,57 +89,134 @@ const {data: merchantData, error} = await useAsyncData(
             {{ $t('cart') }}
           </v-app-bar-title>
         </v-app-bar>
-        <v-container class="pt-10 mt-10">
-          <v-row>
-            <v-col cols="12" v-for="cart in merchantStore.carts">
-              <v-card variant="outlined" color="primary">
-                <div class="d-flex">
-                  <div>
-                    <v-img :src="cart?.item?.photo" height="150px" width="150px" cover></v-img>
-                  </div>
+        <v-container min-height="90vh" class="mt-10 w-100">
+          <v-col cols="12">
+            <v-virtual-scroll
+                v-if="merchantStore.carts.length > 0"
+                height="80vh"
+                :items="merchantStore.carts">
+              <template v-slot:default="{ item }">
+                <div class="pb-4">
+                  <v-card variant="outlined" color="primary">
+                    <div class="d-flex">
+                      <div>
+                        <v-img :src="item?.item?.photo" height="150px" width="150px" cover></v-img>
+                      </div>
 
-                  <v-col class="py-3 px-3">
-                    <div class="col-12">
-                      <v-card-subtitle class="text-caption-2 px-0 text-primary">
-                        ID : {{ cart?.item?.code || $t('N/A') }}
-                      </v-card-subtitle>
-                      <v-card-title class="text-h6 px-0 pt-0 pb-1 font-weight-regular text-black text-wrap">
-                        {{ $i18n.locale === 'en' ? cart?.item?.name_en : cart?.item?.name_kh }}
-                      </v-card-title>
-                    </div>
+                      <v-col class="py-3 px-3">
+                        <div class="col-12">
+                          <v-card-subtitle class="text-caption-2 px-0 text-primary">
+                            ID : {{ item?.item?.code || $t('N/A') }}
+                          </v-card-subtitle>
+                          <h2 class="text-h6 px-0 pt-0 pb-1 font-weight-regular text-black text-wrap">
+                            {{ $i18n.locale === 'en' ? item?.item?.name_en : item?.item?.name_kh }}
+                          </h2>
+                        </div>
 
-                    <span class="text-subtitle-1 font-weight-bold">
-                      $ {{ cart?.item?.price_en }}
+                        <span class="text-subtitle-1 font-weight-bold">
+                      $ {{ item?.item?.price_en }} {{ item?.item?.price_kh ? `| R ${item?.item?.price_kh}` : '' }}
                     </span>
 
-                    <div>
-                      <v-number-input
-                          v-model="cart.quantity"
-                          :reverse="false"
-                          controlVariant="split"
-                          label=""
-                          :hideInput="false"
-                          :inset="false"
-                          hide-details
-                          :min="0"
-                          :max="100"
-                          color="primary"
-                          variant="outlined"
-                          density="compact"
-                          class="mr-3"
-                      ></v-number-input>
+                        <div>
+                          <v-number-input
+                              v-model="item.quantity"
+                              :reverse="false"
+                              controlVariant="split"
+                              label=""
+                              :hideInput="false"
+                              :inset="false"
+                              hide-details
+                              :min="0"
+                              :max="100"
+                              color="primary"
+                              variant="outlined"
+                              density="compact"
+                              class="mr-3"
+                          ></v-number-input>
+                        </div>
+                      </v-col>
                     </div>
-
-
-                  </v-col>
+                  </v-card>
                 </div>
-
-
-              </v-card>
-            </v-col>
-          </v-row>
+              </template>
+            </v-virtual-scroll>
+            <v-row v-else>
+              <v-col cols="12" class="text-center mt-10 mpt-10">
+                <v-row justify="center" class="mt-10 mpt-10">
+                  <v-icon size="34" color="primary">mdi-alert-circle-outline</v-icon>
+                </v-row>
+                <v-row justify="center">
+                  <p class="text-subtitle-1 mt-3" color="primary">
+                    You have no items in your cart.
+                  </p>
+                </v-row>
+              </v-col>
+            </v-row>
+          </v-col>
+          <div class="py-3 px-3" v-if="merchantStore.carts.length != 0">
+            <v-row>
+              <v-col cols="8">
+                <div>
+                  <h2>Total</h2>
+                  <h3 class="font-weight-bold">
+                    $ {{ calculateTotalPrice }} | R {{ calculateTotalPriceInRiel }}
+                  </h3>
+                </div>
+              </v-col>
+              <div class="pt-8">
+                <v-btn
+                    size="large"
+                    color="primary"
+                    @click="merchantStore.showPlaceOrderModel()"
+                >
+                  {{ $t('checkout') }}
+                </v-btn>
+              </div>
+            </v-row>
+          </div>
         </v-container>
       </v-app>
+    </v-dialog>
+
+    <v-dialog
+        v-model="merchantStore.showPlaceOrder"
+        max-width="400"
+        persistent
+    >
+      <v-card :loading="merchantStore.isOrdering" :disabled="merchantStore.isOrdering">
+        <template v-slot:title>
+          <div>
+            <h4 class="font-weight-bold">
+              Are you sure you want to place an order?
+            </h4>
+
+          </div>
+        </template>
+        <template v-slot:text>
+          <div>
+            <p>
+              By clicking "Yes", you will place an order to the merchant.
+            </p>
+
+            <v-textarea class="mt-3" label="Note" v-model="merchantStore.note" variant="outlined">
+
+            </v-textarea>
+          </div>
+        </template>
+        <v-divider></v-divider>
+
+        <template v-slot:actions>
+          <v-spacer></v-spacer>
+
+          <v-btn size="large" variant="outlined" @click="merchantStore.hidePlaceOrderModel()">
+            No
+          </v-btn>
+
+          <v-btn size="large" variant="flat" color="primary" @click="merchantStore.placeOrder()">
+            Yes
+          </v-btn>
+        </template>
+      </v-card>
     </v-dialog>
   </div>
 </template>
