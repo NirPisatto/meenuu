@@ -146,7 +146,12 @@ export const useMenuStore = defineStore("menu", {
             } else {
                 this.showPlaceOrder = false;
                 this.showCart = false;
-                this.isOrdering = false
+                if (!this.merchant?.order_telegram) {
+                    this.isOrdering = false
+                    this.carts = [];
+                    this.note = '';
+                    return;
+                };
 
                 fetch("https://jlyb4i.buildship.run/orders", {
                     method: "POST",
@@ -155,7 +160,7 @@ export const useMenuStore = defineStore("menu", {
                     },
                     body: new URLSearchParams({
                         message: this.formatCartItemsForTelegram(),
-                        cID: "-1002090117656"
+                        cID: this.merchant?.order_telegram
                     })
                 }).then(() => {
                     console.log('API called without waiting for response');
@@ -164,27 +169,28 @@ export const useMenuStore = defineStore("menu", {
                 }).finally(() => {
                     this.carts = [];
                     this.note = '';
+                    this.isOrdering = false
                 });
             }
         },
         formatCartItemsForTelegram(): string {
-            let message = 'Cart Summary:\n';
+            let message = 'Order Summary:\n';
             const date = new Date().toLocaleDateString();
 
             message += `Date: ${date}\n\n`;
 
-            message += 'id\t\tName\t\tQuantity\n';
-            message += '-------------------------------\n';
+            message += 'Items\n';
+            message += '---------------------------------------------------------\n';
 
 
             this.carts.forEach((item) => {
                 const itemName = item.item.name_en;
                 const quantity = item.quantity;
 
-                message += `${item.item.code} \t\t${itemName}\t${quantity}\n`;
+                message += `${item.item.code} \t\t${itemName}\t x ${quantity}\n`;
             });
 
-            message += '-------------------------------\n\n';
+            message += '---------------------------------------------------------\n\n';
             message += 'Note: \n';
             message += this.note || 'No note provided';
 
