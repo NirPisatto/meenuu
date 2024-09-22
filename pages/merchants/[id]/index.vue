@@ -186,7 +186,7 @@ const handleOnClickCard = (item: any) => {
             {{ merchant?.name_en || merchant?.name_kh || 'N/A' }}
           </v-app-bar-title>
           <template v-slot:append>
-            <v-btn v-if="merchant?.allow_order" color="primary" @click="merchantStore.showCartModal()" class="text-none" icon size="large">
+            <v-btn :loading="merchantStore.isOrdering" v-if="merchant?.allow_order" color="primary" @click="merchantStore.showCartModal()" class="text-none" icon size="large">
               <v-badge color="error" :content="merchantStore.carts.length">
                 <v-icon>mdi-cart-outline</v-icon>
               </v-badge>
