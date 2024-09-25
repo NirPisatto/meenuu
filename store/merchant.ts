@@ -189,7 +189,7 @@ export const useMenuStore = defineStore("menu", {
 <b>Order Summary:</b>
 ${date}
 <b>Customer:</b> ${customerId}
-<b>T/L:</b> ${transactionId}\n
+<b>T/L:</b> -\n
 Qty  Desc                    Amt
 ------------------------------------------
 `;
