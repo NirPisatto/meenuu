@@ -197,10 +197,15 @@ watch(() => merchantStore.showCart, (val) => {
             <p>
               By clicking "Yes", you will place an order to the merchant.
             </p>
+            <v-form ref="form">
 
-            <v-textarea class="mt-3" label="Note" v-model="merchantStore.note" variant="outlined">
+              <v-text-field class="mt-3" label="Phone Number" :rules="[v => !!v || 'This field is required']"  v-model="merchantStore.customer" variant="outlined">
+              </v-text-field>
 
-            </v-textarea>
+              <v-textarea class="mt-3" label="Note" v-model="merchantStore.note" variant="outlined">
+              </v-textarea>
+            </v-form>
+
           </div>
         </template>
         <v-divider></v-divider>
@@ -208,11 +213,20 @@ watch(() => merchantStore.showCart, (val) => {
         <template v-slot:actions>
           <v-spacer></v-spacer>
 
-          <v-btn size="large" variant="outlined" @click="merchantStore.hidePlaceOrderModel()">
+          <v-btn size="large" variant="outlined" @click="()=>{
+            merchantStore.hidePlaceOrderModel()
+          }">
             No
           </v-btn>
 
-          <v-btn size="large" variant="flat" color="primary" @click="merchantStore.placeOrder()">
+          <v-btn size="large" variant="flat" color="primary" @click="async ()=>{
+
+            let resp = await $refs.form.validate()
+            console.log('afadf',resp )
+            if(resp.valid){
+              merchantStore.placeOrder()
+            }
+            }">
             Yes
           </v-btn>
         </template>

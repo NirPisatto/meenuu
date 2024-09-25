@@ -15,7 +15,8 @@ export const useMenuStore = defineStore("menu", {
         showCart: boolean,
         showPlaceOrder: boolean,
         note: string,
-        isOrdering: boolean
+        isOrdering: boolean,
+        customer: string
     } => ({
         menus: [],
         merchant: null,
@@ -27,7 +28,8 @@ export const useMenuStore = defineStore("menu", {
         showCart: false,
         showPlaceOrder: false,
         note: '',
-        isOrdering: false
+        isOrdering: false,
+        customer: ''
     }),
     getters: {
         allMenus: (state) => state.menus,
@@ -177,7 +179,7 @@ export const useMenuStore = defineStore("menu", {
         },
         formatCartItemsForTelegram(): string {
             const date = new Date().toLocaleString();  // Includes time
-            const customerId = '010222245';  // Example customer ID
+            const customerId = this.customer;  // Example customer ID
             const transactionId = 3;         // Example transaction ID
             let totalItems = 0;
             let totalAmount = 0;
