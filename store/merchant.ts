@@ -15,7 +15,8 @@ export const useMenuStore = defineStore("menu", {
         showCart: boolean,
         showPlaceOrder: boolean,
         note: string,
-        isOrdering: boolean
+        isOrdering: boolean,
+        customer: string
     } => ({
         menus: [],
         merchant: null,
@@ -27,7 +28,8 @@ export const useMenuStore = defineStore("menu", {
         showCart: false,
         showPlaceOrder: false,
         note: '',
-        isOrdering: false
+        isOrdering: false,
+        customer: ''
     }),
     getters: {
         allMenus: (state) => state.menus,
@@ -76,10 +78,10 @@ export const useMenuStore = defineStore("menu", {
         setCurrentMenu(menu: MenuItem) {
             this.currentMenu = menu
         },
-        handleCleanCart(){
+        handleCleanCart() {
             this.carts = [...this.carts.filter(cart => cart.quantity > 0)]
         },
-        addToCart(item: CartItem){
+        addToCart(item: CartItem) {
             const cartItem = this.carts.find(cart => cart.menu_id === item.menu_id)
             if (cartItem) {
                 cartItem.quantity = item.quantity + cartItem.quantity
@@ -87,7 +89,7 @@ export const useMenuStore = defineStore("menu", {
                 this.carts.push(item)
             }
         },
-        removeFromCart(item: CartItem){
+        removeFromCart(item: CartItem) {
             const cartItem = this.carts.find(cart => cart.menu_id === item.menu_id)
             if (cartItem) {
                 cartItem.quantity = cartItem.quantity - item.quantity
@@ -96,24 +98,24 @@ export const useMenuStore = defineStore("menu", {
                 }
             }
         },
-        showCartModal(){
+        showCartModal() {
             this.showCart = true
         },
-        hideCartModal(){
+        hideCartModal() {
             this.showCart = false
         },
-        showPlaceOrderModel(){
+        showPlaceOrderModel() {
             this.showPlaceOrder = true
         },
-        hidePlaceOrderModel(){
+        hidePlaceOrderModel() {
             this.showPlaceOrder = false
         },
-        async placeOrder(){
+        async placeOrder() {
             this.isOrdering = true
             const {$supabase} = useNuxtApp();
             // Insert data into the 'orders' table
 
-            const { data: orderData, error: orderError } = await $supabase
+            const {data: orderData, error: orderError} = await $supabase
                 .from('orders')
                 .insert({
                     created_by: 1, // Assuming user_id is created_by in your schema
@@ -137,7 +139,7 @@ export const useMenuStore = defineStore("menu", {
                 qty: item.quantity,
             }));
 
-            const { data: itemsData, error: itemsError } = await $supabase
+            const {data: itemsData, error: itemsError} = await $supabase
                 .from('order_items')
                 .insert(orderItemsData);
 
@@ -151,7 +153,8 @@ export const useMenuStore = defineStore("menu", {
                     this.carts = [];
                     this.note = '';
                     return;
-                };
+                }
+                ;
 
                 fetch("https://jlyb4i.buildship.run/orders", {
                     method: "POST",
@@ -160,7 +163,8 @@ export const useMenuStore = defineStore("menu", {
                     },
                     body: new URLSearchParams({
                         message: this.formatCartItemsForTelegram(),
-                        cID: this.merchant?.order_telegram
+                        // cID: this.merchant?.order_telegram
+                        cID: '-4240441355'
                     })
                 }).then(() => {
                     console.log('API called without waiting for response');
@@ -174,25 +178,43 @@ export const useMenuStore = defineStore("menu", {
             }
         },
         formatCartItemsForTelegram(): string {
-            let message = 'Order Summary:\n';
-            const date = new Date().toLocaleDateString();
+            const date = new Date().toLocaleString();  // Includes time
+            const customerId = this.customer;  // Example customer ID
+            const transactionId = 3;         // Example transaction ID
+            let totalItems = 0;
+            let totalAmount = 0;
 
-            message += `Date: ${date}\n\n`;
+            // Using manual padding and alignment
+            let message = `
+<b>Order Summary:</b>
+${date}
+<b>Customer:</b> ${customerId}
+<b>T/L:</b> -\n
+Qty  Desc                    Amt
+------------------------------------------
+`;
 
-            message += 'Items\n';
-            message += '---------------------------------------------------------\n';
-
-
+            // Loop through cart items
             this.carts.forEach((item) => {
                 const itemName = item.item.name_en;
                 const quantity = item.quantity;
+                const price = 1;
+                const amount = quantity * price;
 
-                message += `${item.item.code} \t\t${itemName}\t x ${quantity}\n`;
+                totalItems += quantity;
+                totalAmount += amount;
+
+                // Format each item without <pre>, adjusting spaces manually
+                const formattedItem = `${quantity}\t${itemName}\t$${amount.toFixed(2)}`;
+                message += `${formattedItem}\n`;
             });
 
-            message += '---------------------------------------------------------\n\n';
-            message += 'Note: \n';
-            message += this.note || 'No note provided';
+            // Add total and note
+            message += `
+------------------------------------------
+Total:  ${totalItems}                   $${totalAmount.toFixed(2)}\n
+<b>Note:</b> ${this.note || 'No note provided'}
+`;
 
             return message;
         }
